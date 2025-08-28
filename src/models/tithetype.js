@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
-      TitheType.belongsTo(models.Tithe, {
+      TitheType.hasOne(models.Tithe, {
         foreignKey: "titheTypeId",
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",

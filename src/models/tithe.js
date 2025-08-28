@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Tithe.hasOne(models.TitheType, {
         foreignKey: "titheTypeId",
+        as:'titheType',
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       });
