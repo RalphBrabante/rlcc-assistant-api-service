@@ -1,4 +1,5 @@
 const { User, Tithe, TitheType } = require("../../models");
+const tithetype = require("../../models/tithetype");
 
 module.exports.cacheRead = async (req, res, next) => {
   next();
@@ -11,6 +12,17 @@ module.exports.validate = async (req, res, next) => {
 module.exports.invoke = async (req, res, next) => {
   try {
     const user = await User.findByPk(1, {
+      attributes: ["id"],
+    });
+
+    user.createTithe({
+      amount: 25.22,
+      titheTypeId: 1,
+      dateReceived: new Date(),
+    });
+
+    await user.reload({
+      attributes: ["id"],
       include: [
         {
           model: Tithe,
@@ -21,12 +33,6 @@ module.exports.invoke = async (req, res, next) => {
           include: [{ model: TitheType, as: "titheType" }],
         },
       ],
-    });
-
-    await user.createTithe({
-      amount: 25.22,
-      titheTypeId: 1,
-      dateReceived: new Date(),
     });
 
     res.send({

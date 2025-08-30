@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
-      TitheType.hasOne(models.Tithe, {
+      TitheType.hasMany(models.Tithe, {
         foreignKey: "titheTypeId",
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",
@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: {
         type: DataTypes.STRING,
+        allowNull: false,
+      },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
         allowNull: false,
       },
     },

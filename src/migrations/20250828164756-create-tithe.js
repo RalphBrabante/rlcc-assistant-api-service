@@ -13,6 +13,11 @@ module.exports = {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
       },
+      isActive:{
+        type:Sequelize.BOOLEAN,
+        defaultValue:true,
+        allowNull:false,
+      },
       userId: {
         type: Sequelize.INTEGER,
         allowNull: true,
