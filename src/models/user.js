@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.belongsToMany(models.Role, {
         through: "UserRoles",
-        as:"roles",
+        as: "roles",
         foreignKey: "userId",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
@@ -40,6 +40,14 @@ module.exports = (sequelize, DataTypes) => {
   }
   User.init(
     {
+      firstName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      lastName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       password: {
         type: DataTypes.STRING,
         allowNull: false,

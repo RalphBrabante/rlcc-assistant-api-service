@@ -6,6 +6,7 @@ const createTithe = require("../controllers/tithe/createTithe");
 const deleteTithe = require("../controllers/tithe/deleteTithe");
 const updateTithe = require("../controllers/tithe/updateTithe");
 const getAllTitheAndCount = require("../controllers/tithe/getAllTitheAndCount");
+const getUserTitheAndCount = require("../controllers/tithe/getUserTitheAndCount");
 const authenticate = require("../middlewares/authenticate");
 
 const initTitheResource = require("../middlewares/initTitheResource");
@@ -43,6 +44,14 @@ router.get(
   authorize(["read_all_tithe"]),
   getAllTitheAndCount.validate,
   getAllTitheAndCount.invoke
+);
+
+router.get(
+  "/user",
+  authenticate,
+  authorize(["read_own_tithe"]),
+  getUserTitheAndCount.validate,
+  getUserTitheAndCount.invoke
 );
 
 module.exports = router;

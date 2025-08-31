@@ -25,7 +25,7 @@ module.exports.validate = async (req, res, next) => {
     where: {
       emailAddress: credentials.emailAddress,
     },
-    attributes: ["id", "emailAddress", "password"],
+    attributes: ["id", "emailAddress", "firstName", "lastName", "password"],
     include: {
       model: Role,
       as: "roles",
@@ -73,8 +73,10 @@ module.exports.invoke = async (req, res, next) => {
     let token;
 
     let rolesActions = [];
+    let roles = [];
 
     for (let role of user.roles) {
+      roles.push(role.name);
       for (let perm of role.permissions) {
         if (!rolesActions.includes(perm.method)) {
           rolesActions.push(perm.method);
@@ -83,9 +85,18 @@ module.exports.invoke = async (req, res, next) => {
     }
 
     await (async () => {
-      token = jwt.sign({ id: user.id, permissions: rolesActions }, "secretKey", {
-        expiresIn: "1 hour",
-      });
+      token = jwt.sign(
+        {
+          id: user.id,
+          name: user.firstName + " " + user.lastName,
+          permissions: rolesActions,
+          roles,
+        },
+        "secretKey",
+        {
+          expiresIn: "1 hour",
+        }
+      );
     })();
 
     //save token in database

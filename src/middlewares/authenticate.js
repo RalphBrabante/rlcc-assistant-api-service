@@ -9,14 +9,18 @@ module.exports = async (req, res, next) => {
     return res.status(401).json({ message: "Access token required" });
   }
 
-  jwt.verify(token,'secretKey', (err, user) => {
+  jwt.verify(token, "secretKey", (err, user) => {
     if (err) {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
 
     // Attach user payload to request object
-    res.locals.user = {id:user.id, permissions:user.permissions};
+    res.locals.user = {
+      id: user.id,
+      name: user.firstName + " " + user.lastName,
+      permissions: user.permissions,
+      roles: user.roles,
+    };
     next();
   });
-
 };
