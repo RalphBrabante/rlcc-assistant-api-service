@@ -1,5 +1,5 @@
 "use strict";
-const { User, Sequelize } = require("../../models");
+const { User, Sequelize, Role, Permission } = require("../../models");
 const { Op } = Sequelize;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -14,13 +14,6 @@ module.exports.validate = async (req, res, next) => {
     });
   }
 
-  if (!credentials.username) {
-    return next({
-      status: 400,
-      message: "Username or email is required",
-    });
-  }
-
   if (!credentials.password) {
     return next({
       status: 400,
@@ -30,12 +23,21 @@ module.exports.validate = async (req, res, next) => {
 
   const user = await User.findOne({
     where: {
-      [Op.or]: [
-        { username: credentials.username },
-        { emailAddress: credentials.username },
-      ],
+      emailAddress: credentials.emailAddress,
     },
-    attributes: ["id", "username", "password"],
+    attributes: ["id", "emailAddress", "password"],
+    include: {
+      model: Role,
+      as: "roles",
+      attributes: ["id", "name"],
+      through: { attributes: [] },
+      include: {
+        model: Permission,
+        as: "permissions",
+        attributes: ["id", "method"],
+        through: { attributes: [] },
+      },
+    },
   });
 
   if (!user) {
@@ -70,8 +72,20 @@ module.exports.invoke = async (req, res, next) => {
     //create token
     let token;
 
+    let rolesActions = [];
+
+    for (let role of user.roles) {
+      for (let perm of role.permissions) {
+        if (!rolesActions.includes(perm.method)) {
+          rolesActions.push(perm.method);
+        }
+      }
+    }
+
     await (async () => {
-      token = jwt.sign({ user }, "secretKey", { expiresIn: "1 hour" });
+      token = jwt.sign({ id: user.id, permissions: rolesActions }, "secretKey", {
+        expiresIn: "1 hour",
+      });
     })();
 
     //save token in database

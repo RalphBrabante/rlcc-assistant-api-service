@@ -9,27 +9,33 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-
       User.hasMany(models.Token, {
         foreignKey: "userId",
         as: "tokens",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
-
       User.belongsToMany(models.Role, {
         through: "UserRoles",
+        as:"roles",
         foreignKey: "userId",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
-
       User.hasMany(models.Tithe, {
         foreignKey: "userId",
         as: "tithes",
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       });
+    }
+    // remove password from json response
+
+    toJSON() {
+      // Spread all attributes except password
+      const attributes = { ...this.get() };
+      delete attributes.password;
+      return attributes;
     }
   }
   User.init(
@@ -66,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       emailAddress: {
         type: DataTypes.STRING,
-        unique: true, // 👈 ensures uniqueness at the DB level
+        // unique: true, // 👈 ensures uniqueness at the DB level
         validate: {
           isEmail: true, // 👈 validates correct email format
         },
