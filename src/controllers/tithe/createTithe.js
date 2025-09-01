@@ -5,19 +5,20 @@ module.exports.cacheRead = async (req, res, next) => {
 };
 
 module.exports.validate = async (req, res, next) => {
-
   next();
 };
 
 module.exports.invoke = async (req, res, next) => {
   const { user } = res.locals;
+  const { amount, memberId, titheTypeId, dateReceived } = req.body.tithe;
   try {
     const tithe = await Tithe.create(
       {
-        amount: 25.22,
-        titheTypeId: 1,
+        amount,
+        titheTypeId,
         userId: user.id,
-        dateReceived: new Date(),
+        memberId,
+        dateReceived,
       },
       {
         include: [{ model: TitheType, as: "titheType" }],

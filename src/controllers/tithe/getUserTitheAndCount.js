@@ -1,5 +1,4 @@
 const { User, Tithe, TitheType } = require("../../models");
-const tithetype = require("../../models/tithetype");
 
 module.exports.cacheRead = async (req, res, next) => {
   next();
@@ -18,8 +17,27 @@ module.exports.invoke = async (req, res, next) => {
       where: {
         memberId: user.id,
       },
+      order: [
+        ["dateReceived", "DESC"],
+        ["id", "DESC"],
+      ],
+
       include: [
-        { model: User, as: "encoder", attributes: ["id", "emailAddress"] },
+        {
+          model: User,
+          as: "encoder",
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
+        },
+        {
+          model: User,
+          as: "giver",
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
+        },
+        {
+          model: TitheType,
+          as: "titheType",
+          attributes: ["id", "name"],
+        },
       ],
     });
 

@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Tithe.belongsTo(models.User, {
-        foreignKey: "userId",
+        foreignKey: "memberId",
         as: "giver",
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",

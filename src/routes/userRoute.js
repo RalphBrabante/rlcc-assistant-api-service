@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const createUser = require("../controllers/user/createUser");
 const getUser = require("../controllers/user/getUser");
+const getAllActiveUsers = require("../controllers/user/getAllActiveUsers");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 
@@ -12,6 +13,14 @@ router.get(
   authorize(["read_user"]),
   getUser.validate,
   getUser.invoke
+);
+
+router.get(
+  "/",
+  authenticate,
+  authorize(["read_all_users"]),
+  getAllActiveUsers.validate,
+  getAllActiveUsers.invoke
 );
 
 router.post(

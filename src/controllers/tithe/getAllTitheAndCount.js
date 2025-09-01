@@ -1,3 +1,4 @@
+"use strict";
 const { User, Tithe, TitheType } = require("../../models");
 const tithetype = require("../../models/tithetype");
 
@@ -12,9 +13,33 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
+  const { limit, page } = req.query;
+
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+
   try {
     const tithes = await Tithe.findAndCountAll({
-      include: [{ model: User, as: "encoder", attributes:['id','emailAddress']}],
+      limit: parseInt(limit),
+      offset,
+      order: [["id", "DESC"]],
+
+      include: [
+        {
+          model: User,
+          as: "encoder",
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
+        },
+        {
+          model: User,
+          as: "giver",
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
+        },
+        {
+          model: TitheType,
+          as: "titheType",
+          attributes: ["id", "name"],
+        },
+      ],
     });
 
     res.send({
