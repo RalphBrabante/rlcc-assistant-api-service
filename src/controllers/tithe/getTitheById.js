@@ -1,3 +1,4 @@
+"use strict";
 const { User, Tithe, TitheType } = require("../../models");
 
 module.exports.cacheRead = async (req, res, next) => {
@@ -12,16 +13,10 @@ module.exports.validate = async (req, res, next) => {
 
 module.exports.invoke = async (req, res, next) => {
   const { user } = res.locals;
+  const { id } = req.params;
+
   try {
-    const tithes = await Tithe.findAndCountAll({
-      where: {
-        memberId: user.id,
-        isActive: true,
-      },
-      order: [
-        ["dateReceived", "DESC"],
-        ["id", "DESC"],
-      ],
+    const tithe = await Tithe.findByPk(id, {
       include: [
         {
           model: User,
@@ -41,9 +36,31 @@ module.exports.invoke = async (req, res, next) => {
       ],
     });
 
+    const r = user.roles.includes("SUPERUSER");
+
+    if (
+      !user.roles.includes("SUPERUSER") &&
+      !user.roles.includes("ADMINISTRATOR") &&
+      !user.roles.includes("ACCOUNTANT")
+    ) {
+      if (user.id !== tithe.memberId) {
+        return next({
+          status: 403,
+          message: "You are not allowed to view other member's tithe.",
+        });
+      }
+    }
+
+    if (!tithe) {
+      return next({
+        status: 404,
+        message: "Tithe not found.",
+      });
+    }
+
     res.send({
       status: 200,
-      tithes,
+      tithe,
     });
 
     next();

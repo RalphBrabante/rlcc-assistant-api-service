@@ -22,7 +22,7 @@ module.exports.invoke = async (req, res, next) => {
 
     res.send({
       status: 200,
-      id: tithe,
+      id: tithe.id,
     });
 
     next();

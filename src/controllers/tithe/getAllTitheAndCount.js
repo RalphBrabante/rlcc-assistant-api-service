@@ -22,7 +22,9 @@ module.exports.invoke = async (req, res, next) => {
       limit: parseInt(limit),
       offset,
       order: [["id", "DESC"]],
-
+      where: {
+        isActive: true,
+      },
       include: [
         {
           model: User,
