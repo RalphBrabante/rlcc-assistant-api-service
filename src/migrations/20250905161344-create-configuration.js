@@ -2,26 +2,20 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Tokens", {
+    await queryInterface.createTable("Configurations", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      token: {
-        type: Sequelize.STRING(1024),
+      name: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
-      userId: {
-        type: Sequelize.INTEGER,
+      value: {
+        type: Sequelize.STRING,
         allowNull: false,
-        references: {
-          key: "id",
-          model: "Users",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
       },
       createdAt: {
         allowNull: false,
@@ -32,8 +26,20 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
+
+    // insert initial data
+    await queryInterface.bulkInsert(
+      "Configurations",
+      [
+        {
+          name: "maintenance_mode",
+          value: "false",
+        },
+      ],
+      {}
+    );
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Tokens");
+    await queryInterface.dropTable("Configurations");
   },
 };
