@@ -10,14 +10,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
-      Group.belongsTo("User", {
+      Group.belongsTo(models.User, {
         foreignKey: "userId",
         as: "creator",
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       });
 
-      Group.belongsTo("User", {
+      Group.belongsTo(models.User, {
         foreignKey: "leaderId",
         as: "leader",
         onDelete: "NO ACTION",
