@@ -28,6 +28,28 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       });
+
+      User.hasMany(models.Group, {
+        foreignKey: "userId",
+        as: "createdGroups",
+        onDelete: "NO ACTION",
+        onUpdate: "CASCADE",
+      });
+
+      User.hasMany(models.Group, {
+        foreignKey: "leaderId",
+        as: "managedGroups",
+        onDelete: "NO ACTION",
+        onUpdate: "CASCADE",
+      });
+
+      User.belongsToMany(models.Group, {
+        through: "GroupUsers",
+        as: "assignedGroup",
+        foreignKey: "userId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
     // remove password from json response
 

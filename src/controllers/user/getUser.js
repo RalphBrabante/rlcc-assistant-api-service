@@ -8,9 +8,11 @@ module.exports.validate = async (req, res, next) => {
     include: {
       model: Role,
       attributes: ["id", "name"],
+      as:'roles',
       through: { attributes: [] },
       include: {
         model: Permission,
+        as:"permissions",
         attributes: ["id", "method"],
         through: { attributes: [] },
       },

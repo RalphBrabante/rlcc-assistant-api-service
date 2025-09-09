@@ -88,7 +88,7 @@ module.exports.invoke = async (req, res, next) => {
       token = jwt.sign(
         {
           id: user.id,
-          name: user.firstName + " " + user.lastName,
+          name: user.firstName + "" + user.lastName,
           permissions: rolesActions,
           roles,
         },

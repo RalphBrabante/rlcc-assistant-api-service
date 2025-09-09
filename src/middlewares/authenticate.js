@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
     // Attach user payload to request object
     res.locals.user = {
       id: user.id,
-      name: user.firstName + " " + user.lastName,
+      name: user.name,
       permissions: user.permissions,
       roles: user.roles,
     };
