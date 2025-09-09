@@ -58,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
     },
     {
       sequelize,
