@@ -4,6 +4,7 @@ const router = express.Router();
 const createGroup = require("../controllers/group/createGroup");
 const assignUserToGroup = require("../controllers/group/assignUserToGroup");
 const getAndCountGroup = require("../controllers/group/getAndCountGroup");
+const getGroupById = require("../controllers/group/getGroupById");
 const updateGroup = require("../controllers/group/updateGroup");
 const deleteGroup = require("../controllers/group/deleteGroup");
 const authenticate = require("../middlewares/authenticate");
@@ -50,6 +51,14 @@ router.delete(
   initGroupResource,
   deleteGroup.validate,
   deleteGroup.invoke
+);
+
+router.get(
+  "/:id",
+  authenticate,
+  authorize(["read_own_group", "read_all_groups"]),
+  getGroupById.validate,
+  getGroupById.invoke
 );
 
 module.exports = router;

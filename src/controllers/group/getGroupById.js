@@ -12,22 +12,22 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const { limit, page } = req.query;
-
-  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const { user } = res.locals;
+  const { id } = req.params;
 
   try {
-    const groups = await Group.findAndCountAll({
-      limit: parseInt(limit),
-      offset,
-      where: {
-        isActive: true,
-      },
-    });
+    const group = await Group.findByPk(id);
+
+    if (!group) {
+      return next({
+        status: 404,
+        message: "Group not found.",
+      });
+    }
 
     res.send({
       status: 200,
-       groups,
+      group,
     });
 
     next();
