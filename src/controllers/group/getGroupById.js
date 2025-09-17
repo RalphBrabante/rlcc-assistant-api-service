@@ -1,5 +1,5 @@
 "use strict";
-const { Group } = require("../../models");
+const { Group, User } = require("../../models");
 
 module.exports.cacheRead = async (req, res, next) => {
   next();
@@ -16,7 +16,15 @@ module.exports.invoke = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const group = await Group.findByPk(id);
+    const group = await Group.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: "groupMembers",
+          atrributes:[]
+        },
+      ],
+    });
 
     if (!group) {
       return next({

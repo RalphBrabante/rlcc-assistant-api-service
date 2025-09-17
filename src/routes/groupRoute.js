@@ -20,7 +20,6 @@ router.get(
   getAndCountGroup.invoke
 );
 
-
 router.get(
   "/unassigned-users",
   authenticate,
@@ -47,7 +46,7 @@ router.post(
 );
 
 router.post(
-  "/:groupId/user/:userId",
+  "/assign",
   authenticate,
   authorize(["assign_user_to_group"]),
   assignUserToGroup.validate,

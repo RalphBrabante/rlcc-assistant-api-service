@@ -9,12 +9,12 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const { userId, groupId } = req.params;
+
+  const { data } = req.body;
 
   try {
-    const assignedGroup = await GroupUsers.create({
-      userId,
-      groupId,
+    const assignedGroup = await GroupUsers.bulkCreate(data, {
+      validate: true,
     });
 
     res.send({

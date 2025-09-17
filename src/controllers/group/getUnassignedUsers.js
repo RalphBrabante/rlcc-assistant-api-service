@@ -17,7 +17,7 @@ module.exports.invoke = async (req, res, next) => {
   const { keyword } = req.query;
 
   try {
-    const users = await User.findAll({
+    const users = await User.findAndCountAll({
       include: [
         {
           model: Group,
@@ -45,7 +45,7 @@ module.exports.invoke = async (req, res, next) => {
 
     res.send({
       status: 200,
-      users,
+      data:users,
     });
 
     next();
