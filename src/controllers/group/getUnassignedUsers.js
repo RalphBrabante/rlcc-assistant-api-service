@@ -28,9 +28,18 @@ module.exports.invoke = async (req, res, next) => {
       ],
       where: {
         "$assignedGroup.id$": null, // no linked group
-        name: {
-          [Op.like]: `%${keyword}%`, // match members with "john" in their name
-        },
+        [Op.or]: [
+          {
+            firstName: {
+              [Op.like]: `%${keyword}%`, // match members with "john" in their name
+            },
+          },
+          {
+            lastName: {
+              [Op.like]: `%${keyword}%`, // match members with "john" in their name
+            },
+          },
+        ],
       },
     });
 
