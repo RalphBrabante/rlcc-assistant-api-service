@@ -7,6 +7,7 @@ const getAndCountGroup = require("../controllers/group/getAndCountGroup");
 const getGroupById = require("../controllers/group/getGroupById");
 const updateGroup = require("../controllers/group/updateGroup");
 const deleteGroup = require("../controllers/group/deleteGroup");
+const getUnassignedUsers = require("../controllers/group/getUnassignedUsers");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
@@ -17,6 +18,15 @@ router.get(
   authorize(["get_all_group"]),
   getAndCountGroup.validate,
   getAndCountGroup.invoke
+);
+
+
+router.get(
+  "/unassigned-users",
+  authenticate,
+  authorize(["get_all_group"]),
+  getUnassignedUsers.validate,
+  getUnassignedUsers.invoke
 );
 
 router.patch(
