@@ -21,7 +21,7 @@ module.exports.invoke = async (req, res, next) => {
         {
           model: User,
           as: "groupMembers",
-          atrributes:[]
+          attributes: { exclude: ["password"] },
         },
       ],
     });

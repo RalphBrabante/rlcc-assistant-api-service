@@ -58,7 +58,7 @@ module.exports.invoke = async (req, res, next) => {
     const newGeneratedToken = jwt.sign(
       { user: tokenFromDb.user },
       "secretKey",
-      { expiresIn: "1 hour" }
+      { expiresIn: "5 hours" }
     );
 
     // create token in db

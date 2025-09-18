@@ -94,7 +94,7 @@ module.exports.invoke = async (req, res, next) => {
         },
         "secretKey",
         {
-          expiresIn: "1 hour",
+          expiresIn: "5 hours",
         }
       );
     })();
