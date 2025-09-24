@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const createTithe = require("../controllers/tithe/createTithe");
+const createTitheInBulk = require("../controllers/tithe/createTitheInBulk");
 const deleteTithe = require("../controllers/tithe/deleteTithe");
 const updateTithe = require("../controllers/tithe/updateTithe");
 const getAllTitheAndCount = require("../controllers/tithe/getAllTitheAndCount");
@@ -21,6 +22,14 @@ router.post(
   authorize(["create_tithe"]),
   createTithe.validate,
   createTithe.invoke
+);
+
+router.post(
+  "/bulk-create",
+  authenticate,
+  authorize(["create_tithe"]),
+  createTitheInBulk.validate,
+  createTitheInBulk.invoke
 );
 
 router.patch(

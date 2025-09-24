@@ -40,7 +40,7 @@ module.exports.invoke = async (req, res, next) => {
       tithe.giver.emailAddress,
       tithe.amount,
       tithe.titheType.name,
-      tithe.createdAt,
+      tithe.dateReceived,
       req.transporter
     );
 
