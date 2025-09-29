@@ -1,5 +1,4 @@
 const { User, Role, Permission } = require("../../models");
-const bcrypt = require("bcrypt");
 
 module.exports.validate = async (req, res, next) => {
   const { id } = req.params;
@@ -8,11 +7,11 @@ module.exports.validate = async (req, res, next) => {
     include: {
       model: Role,
       attributes: ["id", "name"],
-      as:'roles',
+      as: "roles",
       through: { attributes: [] },
       include: {
         model: Permission,
-        as:"permissions",
+        as: "permissions",
         attributes: ["id", "method"],
         through: { attributes: [] },
       },

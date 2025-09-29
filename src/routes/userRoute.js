@@ -4,11 +4,11 @@ const router = express.Router();
 const createUser = require("../controllers/user/createUser");
 const getUser = require("../controllers/user/getUser");
 const getAllActiveUsers = require("../controllers/user/getAllActiveUsers");
+const updateUser = require("../controllers/user/updateUser");
 const countAllActiveUsers = require("../controllers/user/countAllActiveUsers");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
-
-
+const initUserResource = require("../middlewares/initUserResource");
 
 router.get(
   "/count",
@@ -26,7 +26,6 @@ router.get(
   getAllActiveUsers.invoke
 );
 
-
 router.post(
   "",
   authenticate,
@@ -35,6 +34,14 @@ router.post(
   createUser.invoke
 );
 
+router.patch(
+  "/:id",
+  authenticate,
+  authorize(["update_user"]),
+  initUserResource,
+  updateUser.validate,
+  updateUser.invoke
+);
 
 router.get(
   "/:id",
@@ -43,6 +50,5 @@ router.get(
   getUser.validate,
   getUser.invoke
 );
-
 
 module.exports = router;
