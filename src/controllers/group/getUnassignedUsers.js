@@ -27,7 +27,7 @@ module.exports.invoke = async (req, res, next) => {
         },
       ],
       where: {
-        "$assignedGroup.id$": null, // no linked group
+        // "$assignedGroup.id$": null, // no linked group
         [Op.or]: [
           {
             firstName: {

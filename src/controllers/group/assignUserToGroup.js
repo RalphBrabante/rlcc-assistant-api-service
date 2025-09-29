@@ -25,7 +25,7 @@ module.exports.invoke = async (req, res, next) => {
     next();
   } catch (error) {
     return next({
-      status: 401,
+      status: 520,
       message: error.message,
     });
   }
