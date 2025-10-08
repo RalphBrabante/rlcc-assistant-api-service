@@ -46,7 +46,6 @@ router.patch(
 router.get(
   "/:id",
   authenticate,
-  authorize(["get_user"]),
   getUser.validate,
   getUser.invoke
 );
