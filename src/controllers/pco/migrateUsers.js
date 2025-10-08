@@ -1,7 +1,6 @@
 "use strict";
 
 const axios = require("axios");
-
 module.exports.validate = async (req, res, next) => {
   next();
 };
@@ -12,7 +11,8 @@ module.exports.invoke = async (req, res, next) => {
       "https://api.planningcenteronline.com/people/v2/people?where[last_name]=Baylon",
       {
         auth: {
-       
+          username: process.env.PCO_USERNAME,
+          password: process.env.PCO_PASSWORD,
         },
       }
     );
