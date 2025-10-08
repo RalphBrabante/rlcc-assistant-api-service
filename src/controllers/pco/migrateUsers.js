@@ -12,10 +12,7 @@ module.exports.invoke = async (req, res, next) => {
       "https://api.planningcenteronline.com/people/v2/people?where[last_name]=Baylon",
       {
         auth: {
-          username:
-            "3869335fc30d81aec1a67471e136f722411459459c23f206ecc966cef4b8e6a5",
-          password:
-            "pco_pat_30b45151715226a64153cb33babcd18c5bdb0c14b563330e19f4b9ba35c984af173fca25",
+       
         },
       }
     );
