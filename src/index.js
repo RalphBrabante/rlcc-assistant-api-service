@@ -9,6 +9,7 @@ const appErrorHandler = require("./middlewares/errorHandler");
 const mailerTransporter = require("./middlewares/mailerTransporter");
 const initAmqp = require("./middlewares/initAmqp");
 const titheConsumer = require("./consumers/titheConsumer");
+const usersMigration = require("./consumers/usersMigration");
 
 async function startServer() {
   // Middleware
@@ -31,6 +32,7 @@ async function startServer() {
 
   //consumers
   titheConsumer();
+  usersMigration();
 
   // Start server
   app.listen(port, () => {

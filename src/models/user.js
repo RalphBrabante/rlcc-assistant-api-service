@@ -107,6 +107,39 @@ module.exports = (sequelize, DataTypes) => {
           isEmail: true, // 👈 validates correct email format
         },
       },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
+      pcoId: {
+        type: DataTypes.INTEGER,
+        unique: true,
+      },
+      nickName: {
+        type: DataTypes.STRING,
+
+        allowNull: true,
+      },
+      gender: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      anniversary: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      avatar: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      birthDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
       addressLine1: {
         type: DataTypes.STRING,
         allowNull: true,

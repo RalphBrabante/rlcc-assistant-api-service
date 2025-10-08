@@ -1,0 +1,50 @@
+"use strict";
+
+const axios = require("axios");
+
+module.exports.validate = async (req, res, next) => {
+  next();
+};
+
+module.exports.invoke = async (req, res, next) => {
+  try {
+    const response = await axios.get(
+      "https://api.planningcenteronline.com/people/v2/people?where[last_name]=Baylon",
+      {
+        auth: {
+          username:
+            "3869335fc30d81aec1a67471e136f722411459459c23f206ecc966cef4b8e6a5",
+          password:
+            "pco_pat_30b45151715226a64153cb33babcd18c5bdb0c14b563330e19f4b9ba35c984af173fca25",
+        },
+      }
+    );
+
+    req.amqp.channel.assertQueue("usersMigrationQueue");
+
+    const users = response.data.data.map((u) => {
+      return u;
+    });
+
+    // send each user on queue
+    for (const user of users) {
+      req.amqp.channel.sendToQueue(
+        "usersMigrationQueue",
+        Buffer.from(JSON.stringify(user)),
+        {
+          persistent: true, // message survives broker restart if durable queue
+        }
+      );
+    }
+
+    res.send({
+      status: 200,
+      message: "Users adeded to queue",
+    });
+  } catch (error) {
+    return next({
+      status: 520,
+      message: error.message,
+    });
+  }
+};
