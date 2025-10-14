@@ -1,20 +1,20 @@
-const { User } = require("../../models");
+const { Group } = require("../../models");
 
 module.exports.validate = async (req, res, next) => {
   next();
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const users = await User.findAndCountAll({
+  const circles = await Group.findAndCountAll({
     where: {
       isActive: true,
     },
-    attributes: ["id", "firstName", "lastName", "emailAddress"],
+    attributes: ["id", "name"],
   });
 
   res.send({
     status: 200,
-    count: users.count,
+    count: circles.count,
   });
 
   next();
