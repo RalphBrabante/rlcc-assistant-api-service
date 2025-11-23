@@ -12,8 +12,24 @@ const titheConsumer = require("./consumers/titheConsumer");
 const usersMigration = require("./consumers/usersMigration");
 
 async function startServer() {
+  //cors
+  const allowedOrigins = ["https://rlcc.bulkqrcodegenerator.online"];
+
+  const corsOptions = {
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow mobile apps / curl / Postman
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+  };
+
+  app.use(cors(corsOptions));
+
   // Middleware
-  app.use(cors());
+
   app.use(express.json());
 
   const amqp = await initAmqp();
