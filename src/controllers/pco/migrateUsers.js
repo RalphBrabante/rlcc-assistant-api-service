@@ -6,9 +6,10 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
+  const { lastName } = req.query;
   try {
     const response = await axios.get(
-      "https://api.planningcenteronline.com/people/v2/people?where[last_name]=Brabante",
+      `https://api.planningcenteronline.com/people/v2/people?where[last_name]=${lastName}`,
       {
         auth: {
           username: process.env.PCO_USERNAME,
