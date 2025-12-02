@@ -7,11 +7,15 @@ const getAndCountGroup = require("../controllers/group/getAndCountGroup");
 const countAllActiveGroups = require("../controllers/group/countAllActiveGroups");
 const getGroupById = require("../controllers/group/getGroupById");
 const updateGroup = require("../controllers/group/updateGroup");
+const setUserAsGroupLeader = require("../controllers/group/setUserAsGroupLeader");
 const deleteGroup = require("../controllers/group/deleteGroup");
 const getUnassignedUsers = require("../controllers/group/getUnassignedUsers");
+const joinGroup = require("../controllers/group/joinGroup");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
+const initUserResource = require("../middlewares/initUserResource");
+const asyncHandler = require("../utils/asyncHandler");
 
 router.get(
   "",
@@ -27,6 +31,26 @@ router.get(
   authorize(["get_all_group"]),
   getUnassignedUsers.validate,
   getUnassignedUsers.invoke
+);
+
+
+router.post(
+  "/:id/join",
+  authenticate,
+  authorize(["join_group"]),
+  initGroupResource,
+  asyncHandler(joinGroup.validate),
+  asyncHandler(joinGroup.invoke)
+);
+
+router.patch(
+  "/:id/user/:userId",
+  authenticate,
+  authorize(["update_group"]),
+  initUserResource,
+  initGroupResource,
+  setUserAsGroupLeader.validate,
+  setUserAsGroupLeader.invoke
 );
 
 router.patch(

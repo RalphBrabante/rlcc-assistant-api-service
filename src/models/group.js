@@ -31,6 +31,14 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+
+      Group.hasOne(models.GroupType, {
+        foreignKey: "groupTypeId",
+        as: "groupType",
+        onDelete: "NO ACTION",
+        onUpdate: "CASCADE",
+      });
+      
     }
   }
   Group.init(

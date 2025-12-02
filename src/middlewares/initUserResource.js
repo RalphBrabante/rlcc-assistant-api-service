@@ -1,14 +1,16 @@
 const { User } = require("../models");
 module.exports = async (req, res, next) => {
-  const { id } = req.params;
+  const { id, userId } = req.params;
 
   try {
-    const user = await User.findByPk(id);
+    const lookupId = userId || id;
+
+    const user = await User.findByPk(lookupId);
 
     if (!user) {
       return next({
         status: 404,
-        message: "Tithe not found.",
+        message: "User not found.",
       });
     }
 

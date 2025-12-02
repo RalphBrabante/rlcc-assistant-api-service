@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -49,6 +50,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
+      });
+
+      // event relationship
+      User.belongsToMany(models.Event, {
+        through: "EventUsers",
+        foreignKey: "userId",
       });
     }
     // remove password from json response

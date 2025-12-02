@@ -14,6 +14,7 @@ const usersMigration = require("./consumers/usersMigration");
 async function startServer() {
   //cors
   const allowedOrigins = [
+    "http://localhost:4200",
     "https://bulkqrcodegenerator.online",
     "https://rlcc.bulkqrcodegenerator.online",
     "https://www.bulkqrcodegenerator.online",
