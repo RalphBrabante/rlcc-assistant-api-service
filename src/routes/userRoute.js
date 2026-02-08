@@ -9,11 +9,13 @@ const countAllActiveUsers = require("../controllers/user/countAllActiveUsers");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initUserResource = require("../middlewares/initUserResource");
+const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
 router.get(
   "/count",
   authenticate,
   authorize(["read_all_users"]),
+  cacheRead("users"),
   countAllActiveUsers.validate,
   countAllActiveUsers.invoke
 );
@@ -22,6 +24,7 @@ router.get(
   "",
   authenticate,
   authorize(["read_all_users"]),
+  cacheRead("users"),
   getAllActiveUsers.validate,
   getAllActiveUsers.invoke
 );
@@ -30,6 +33,7 @@ router.post(
   "",
   authenticate,
   authorize(["create_user"]),
+  invalidateCache(["users"]),
   createUser.validate,
   createUser.invoke
 );
@@ -39,6 +43,7 @@ router.patch(
   authenticate,
   authorize(["update_user"]),
   initUserResource,
+  invalidateCache(["users"]),
   updateUser.validate,
   updateUser.invoke
 );
@@ -46,6 +51,8 @@ router.patch(
 router.get(
   "/:id",
   authenticate,
+  authorize(["get_user"]),
+  cacheRead("users"),
   getUser.validate,
   getUser.invoke
 );

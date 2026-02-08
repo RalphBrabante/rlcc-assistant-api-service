@@ -3,6 +3,7 @@ const { Tithe, TitheType, User } = require("../models");
 const amqp = require("amqplib");
 const nodemailer = require("nodemailer");
 const emailTitheDetails = require("../utils/emailTitheDetails");
+const { invalidateResource } = require("../services/cacheService");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
@@ -67,6 +68,7 @@ async function titheConsumer() {
             newTithe.createdAt,
             transporter
           );
+          await invalidateResource("tithes");
           channel.ack(msg);
         } catch (err) {
           console.error("❌ Failed to parse message:", msg.content.toString());

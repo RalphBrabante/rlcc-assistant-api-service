@@ -16,11 +16,13 @@ const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
 const initUserResource = require("../middlewares/initUserResource");
 const asyncHandler = require("../utils/asyncHandler");
+const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
 router.get(
   "",
   authenticate,
   authorize(["get_all_group"]),
+  cacheRead("groups"),
   getAndCountGroup.validate,
   getAndCountGroup.invoke
 );
@@ -29,6 +31,7 @@ router.get(
   "/unassigned-users",
   authenticate,
   authorize(["get_all_group"]),
+  cacheRead("groups"),
   getUnassignedUsers.validate,
   getUnassignedUsers.invoke
 );
@@ -58,6 +61,7 @@ router.patch(
   authenticate,
   authorize(["update_group"]),
   initGroupResource,
+  invalidateCache(["groups"]),
   updateGroup.validate,
   updateGroup.invoke
 );
@@ -66,6 +70,7 @@ router.post(
   "",
   authenticate,
   authorize(["create_group"]),
+  invalidateCache(["groups"]),
   createGroup.validate,
   createGroup.invoke
 );
@@ -74,6 +79,7 @@ router.post(
   "/assign",
   authenticate,
   authorize(["assign_user_to_group"]),
+  invalidateCache(["groups"]),
   assignUserToGroup.validate,
   assignUserToGroup.invoke
 );
@@ -91,6 +97,7 @@ router.delete(
   authenticate,
   authorize(["delete_group"]),
   initGroupResource,
+  invalidateCache(["groups"]),
   deleteGroup.validate,
   deleteGroup.invoke
 );
@@ -99,6 +106,7 @@ router.get(
   "/:id",
   authenticate,
   authorize(["read_own_group", "read_all_groups"]),
+  cacheRead("groups"),
   getGroupById.validate,
   getGroupById.invoke
 );

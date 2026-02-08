@@ -3,6 +3,7 @@ const amqp = require("amqplib");
 const bcrypt = require("bcrypt");
 
 const { User } = require("../models");
+const { invalidateResource } = require("../services/cacheService");
 
 async function usersMigration() {
   try {
@@ -92,6 +93,8 @@ async function usersMigration() {
 
             await dbUser.save();
           }
+
+          await invalidateResource("users");
 
           channel.ack(msg);
         } catch (err) {

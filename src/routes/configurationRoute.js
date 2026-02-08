@@ -7,7 +7,14 @@ const getServerStatus = require("../controllers/configuration/getServerStatus");
 const authenticate = require("../middlewares/authenticate");
 
 const authorize = require("../middlewares/authorize");
+const { cacheRead } = require("../middlewares/cacheMiddleware");
 
-router.get("", authenticate, getServerStatus.validate, getServerStatus.invoke);
+router.get(
+  "",
+  authenticate,
+  cacheRead("configurations"),
+  getServerStatus.validate,
+  getServerStatus.invoke
+);
 
 module.exports = router;

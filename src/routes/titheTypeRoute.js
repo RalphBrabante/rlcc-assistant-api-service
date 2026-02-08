@@ -11,11 +11,13 @@ const authenticate = require("../middlewares/authenticate");
 
 const authorize = require("../middlewares/authorize");
 const initTitheTypeResource = require("../middlewares/initTitheTypeResource");
+const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
 router.get(
   "",
   authenticate,
   authorize(["read_all_tithe_types"]),
+  cacheRead("tithe-types"),
   getAllTitheTypesAndCount.validate,
   getAllTitheTypesAndCount.invoke
 );
@@ -24,6 +26,7 @@ router.post(
   "",
   authenticate,
   authorize(["create_tithe_types"]),
+  invalidateCache(["tithe-types", "tithes"]),
   createTitheType.validate,
   createTitheType.invoke
 );
@@ -33,6 +36,7 @@ router.delete(
   authenticate,
   authorize(["delete_tithe_types"]),
   initTitheTypeResource,
+  invalidateCache(["tithe-types", "tithes"]),
   deleteTitheType.validate,
   deleteTitheType.invoke
 );
@@ -42,6 +46,7 @@ router.patch(
   authenticate,
   authorize(["delete_tithe_types"]),
   initTitheTypeResource,
+  invalidateCache(["tithe-types", "tithes"]),
   updateTitheType.validate,
   updateTitheType.invoke
 );
@@ -51,6 +56,7 @@ router.get(
   authenticate,
   authorize(["get_tithe_type"]),
   initTitheTypeResource,
+  cacheRead("tithe-types"),
   getTitheTypeById.validate,
   getTitheTypeById.invoke
 );

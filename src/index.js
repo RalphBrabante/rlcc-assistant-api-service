@@ -3,39 +3,49 @@ require("dotenv").config();
 const cors = require("cors");
 
 const app = express();
-const port = 3000;
 const routes = require("./routes");
 const appErrorHandler = require("./middlewares/errorHandler");
+const responseFormatter = require("./middlewares/responseFormatter");
 const mailerTransporter = require("./middlewares/mailerTransporter");
 const initAmqp = require("./middlewares/initAmqp");
 const titheConsumer = require("./consumers/titheConsumer");
 const usersMigration = require("./consumers/usersMigration");
+const port = Number(process.env.PORT || 3000);
+const host = process.env.HOST || "0.0.0.0";
+const localhostOrigins = [
+  "http://localhost",
+  "http://localhost:80",
+  "http://localhost:4200",
+  "http://localhost:8080",
+  "http://127.0.0.1",
+  "http://127.0.0.1:80",
+  "http://127.0.0.1:4200",
+  "http://127.0.0.1:8080",
+  "https://bulkqrcodegenerator.online",
+  "https://rlcc.bulkqrcodegenerator.online",
+  "https://www.bulkqrcodegenerator.online",
+];
+const configuredOrigins = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+  : localhostOrigins;
 
 async function startServer() {
-  //cors
-  const allowedOrigins = [
-    "http://localhost:4200",
-    "https://bulkqrcodegenerator.online",
-    "https://rlcc.bulkqrcodegenerator.online",
-    "https://www.bulkqrcodegenerator.online",
-  ];
-
-  const corsOptions = {
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow mobile apps / curl / Postman
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
-  };
-
-  app.use(cors(corsOptions));
-
   // Middleware
-
+  app.use(
+    cors({
+      origin(origin, callback) {
+        if (!origin) {
+          return callback(null, true);
+        }
+        if (configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(null, false);
+      },
+    })
+  );
   app.use(express.json());
+  app.use(responseFormatter);
 
   const amqp = await initAmqp();
 
@@ -56,8 +66,8 @@ async function startServer() {
   usersMigration();
 
   // Start server
-  app.listen(port, () => {
-    console.log(`🚀 Server running at http://localhost:${port}`);
+  app.listen(port, host, () => {
+    console.log(`Server running at http://${host}:${port}`);
   });
 }
 
