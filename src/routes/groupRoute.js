@@ -12,10 +12,14 @@ const deleteGroup = require("../controllers/group/deleteGroup");
 const getUnassignedUsers = require("../controllers/group/getUnassignedUsers");
 const joinGroup = require("../controllers/group/joinGroup");
 const removeUserFromGroup = require("../controllers/group/removeUserFromGroup");
+const getGroupMessages = require("../controllers/groupChat/getGroupMessages");
+const sendGroupMessage = require("../controllers/groupChat/sendGroupMessage");
+const deleteGroupMessage = require("../controllers/groupChat/deleteGroupMessage");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
 const initUserResource = require("../middlewares/initUserResource");
+const initGroupChatAccess = require("../middlewares/initGroupChatAccess");
 const asyncHandler = require("../utils/asyncHandler");
 const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
@@ -45,6 +49,36 @@ router.post(
   initGroupResource,
   asyncHandler(joinGroup.validate),
   asyncHandler(joinGroup.invoke)
+);
+
+router.get(
+  "/:id/chat/messages",
+  authenticate,
+  initGroupResource,
+  initGroupChatAccess,
+  cacheRead("group-messages"),
+  getGroupMessages.validate,
+  getGroupMessages.invoke
+);
+
+router.post(
+  "/:id/chat/messages",
+  authenticate,
+  initGroupResource,
+  initGroupChatAccess,
+  invalidateCache(["group-messages"]),
+  sendGroupMessage.validate,
+  sendGroupMessage.invoke
+);
+
+router.delete(
+  "/:id/chat/messages/:messageId",
+  authenticate,
+  initGroupResource,
+  initGroupChatAccess,
+  invalidateCache(["group-messages"]),
+  deleteGroupMessage.validate,
+  deleteGroupMessage.invoke
 );
 
 router.patch(

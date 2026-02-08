@@ -22,7 +22,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": " NODE_ENV=development nodemon --inspect=0.0.0.0:9229  ./src/index.js"
+    "db:init": "node ./src/scripts/dbInit.js",
+    "dev": " NODE_ENV=development nodemon --inspect=0.0.0.0:9229  ./src/index.js",
+    "dev:boot": "npm run db:init && npm run dev"
   },
   "author": "",
   "license": "ISC",
