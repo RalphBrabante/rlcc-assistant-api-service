@@ -1,5 +1,5 @@
 "use strict";
-const { GroupMessage } = require("../../models");
+const { GroupMessage, User } = require("../../models");
 
 module.exports.validate = async (req, res, next) => {
   const message = req.body?.message || {};
@@ -46,10 +46,26 @@ module.exports.invoke = async (req, res, next) => {
       type: newMessagePayload.type,
     });
 
+    const messageWithSender = await GroupMessage.findByPk(message.id, {
+      include: [
+        {
+          model: User,
+          as: "sender",
+          attributes: ["id", "firstName", "lastName", "avatar"],
+        },
+      ],
+    });
+
+    const io = req.app.get("io");
+    io?.to(`group-chat:${group.id}`).emit("group-chat:new-message", {
+      groupId: group.id,
+      message: messageWithSender || message,
+    });
+
     res.send({
       status: 201,
       data: {
-        message,
+        message: messageWithSender || message,
       },
     });
     return next();

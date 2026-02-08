@@ -1,6 +1,8 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
 const routes = require("./routes");
@@ -10,6 +12,7 @@ const mailerTransporter = require("./middlewares/mailerTransporter");
 const initAmqp = require("./middlewares/initAmqp");
 const titheConsumer = require("./consumers/titheConsumer");
 const usersMigration = require("./consumers/usersMigration");
+const { setupGroupChatSocket } = require("./realtime/groupChatSocket");
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "0.0.0.0";
 const localhostOrigins = [
@@ -30,6 +33,24 @@ const configuredOrigins = process.env.CORS_ALLOWED_ORIGINS
   : localhostOrigins;
 
 async function startServer() {
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin(origin, callback) {
+        if (!origin) {
+          return callback(null, true);
+        }
+        if (configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(null, false);
+      },
+      credentials: true,
+    },
+  });
+  setupGroupChatSocket(io);
+  app.set("io", io);
+
   // Middleware
   app.use(
     cors({
@@ -66,7 +87,7 @@ async function startServer() {
   usersMigration();
 
   // Start server
-  app.listen(port, host, () => {
+  server.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}`);
   });
 }

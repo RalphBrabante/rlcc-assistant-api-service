@@ -51,15 +51,22 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const { groupMessage } = res.locals;
+  const { groupMessage, group } = res.locals;
 
   try {
+    const deletedId = groupMessage.id;
     await groupMessage.destroy();
+
+    const io = req.app.get("io");
+    io?.to(`group-chat:${group.id}`).emit("group-chat:message-deleted", {
+      groupId: group.id,
+      messageId: deletedId,
+    });
 
     res.send({
       status: 200,
       data: {
-        id: groupMessage.id,
+        id: deletedId,
         deleted: true,
       },
     });

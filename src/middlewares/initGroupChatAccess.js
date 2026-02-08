@@ -13,10 +13,6 @@ module.exports = async (req, res, next) => {
   }
 
   try {
-    if (Array.isArray(user.permissions) && user.permissions.includes("read_all_groups")) {
-      return next();
-    }
-
     if (group.userId === user.id || group.leaderId === user.id) {
       return next();
     }
