@@ -59,6 +59,13 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
+      User.hasMany(models.GroupTopic, {
+        foreignKey: "createdBy",
+        as: "createdGroupTopics",
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE",
+      });
+
       // event relationship
       User.belongsToMany(models.Event, {
         through: "EventUsers",

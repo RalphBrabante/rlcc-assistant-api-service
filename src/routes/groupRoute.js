@@ -15,11 +15,16 @@ const removeUserFromGroup = require("../controllers/group/removeUserFromGroup");
 const getGroupMessages = require("../controllers/groupChat/getGroupMessages");
 const sendGroupMessage = require("../controllers/groupChat/sendGroupMessage");
 const deleteGroupMessage = require("../controllers/groupChat/deleteGroupMessage");
+const getGroupTopics = require("../controllers/groupTopic/getGroupTopics");
+const createGroupTopic = require("../controllers/groupTopic/createGroupTopic");
+const getAllGroupTopics = require("../controllers/groupTopic/getAllGroupTopics");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
 const initUserResource = require("../middlewares/initUserResource");
 const initGroupChatAccess = require("../middlewares/initGroupChatAccess");
+const initGroupTopicCreateAccess = require("../middlewares/initGroupTopicCreateAccess");
+const initGroupTopicReadAccess = require("../middlewares/initGroupTopicReadAccess");
 const asyncHandler = require("../utils/asyncHandler");
 const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
@@ -41,6 +46,14 @@ router.get(
   getUnassignedUsers.invoke
 );
 
+router.get(
+  "/topics",
+  authenticate,
+  authorize(["read_all_group_topics"]),
+  cacheRead("group-topics"),
+  getAllGroupTopics.validate,
+  getAllGroupTopics.invoke
+);
 
 router.post(
   "/:id/join",
@@ -49,6 +62,28 @@ router.post(
   initGroupResource,
   asyncHandler(joinGroup.validate),
   asyncHandler(joinGroup.invoke)
+);
+
+router.get(
+  "/:id/topics",
+  authenticate,
+  authorize(["read_group_topics", "read_all_group_topics"]),
+  initGroupResource,
+  initGroupTopicReadAccess,
+  cacheRead("group-topics"),
+  getGroupTopics.validate,
+  getGroupTopics.invoke
+);
+
+router.post(
+  "/:id/topics",
+  authenticate,
+  authorize(["create_group_topic"]),
+  initGroupResource,
+  initGroupTopicCreateAccess,
+  invalidateCache(["group-topics"]),
+  createGroupTopic.validate,
+  createGroupTopic.invoke
 );
 
 router.get(

@@ -1,6 +1,7 @@
 "use strict";
 
 const { Role, Permission } = require("../../models");
+const { rotateUserToken } = require("../../utils/tokenRotation");
 
 module.exports.validate = async (req, res, next) => {
   const roleId = Number(req.params.id);
@@ -62,7 +63,7 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const { role, permissions } = res.locals;
+  const { role, permissions, user: actor } = res.locals;
 
   try {
     await role.setPermissions(permissions);
@@ -80,10 +81,28 @@ module.exports.invoke = async (req, res, next) => {
       order: [[{ model: Permission, as: "permissions" }, "name", "ASC"]],
     });
 
+    const io = req.app.get("io");
+    const usersWithUpdatedRole = await updatedRole.getUsers({
+      attributes: ["id"],
+      joinTableAttributes: [],
+    });
+
+    let refreshedToken = null;
+    for (const affectedUser of usersWithUpdatedRole) {
+      const nextToken = await rotateUserToken(affectedUser.id, {
+        io,
+        reason: "role_permissions_updated",
+      });
+      if (Number(actor?.id) === Number(affectedUser.id)) {
+        refreshedToken = nextToken;
+      }
+    }
+
     res.send({
       status: 200,
       data: {
         role: updatedRole,
+        token: refreshedToken,
       },
     });
 

@@ -1,6 +1,7 @@
 "use strict";
 
 const { Role, User } = require("../../models");
+const { rotateUserToken } = require("../../utils/tokenRotation");
 
 module.exports.validate = async (req, res, next) => {
   const userId = Number(req.params.userId);
@@ -32,11 +33,11 @@ module.exports.validate = async (req, res, next) => {
   }
 
   try {
-    const user = await User.findByPk(userId, {
+    const targetUser = await User.findByPk(userId, {
       attributes: ["id", "firstName", "lastName", "emailAddress", "pcoId"],
     });
 
-    if (!user) {
+    if (!targetUser) {
       return next({
         status: 404,
         message: "User not found.",
@@ -55,7 +56,7 @@ module.exports.validate = async (req, res, next) => {
       });
     }
 
-    res.locals.user = user;
+    res.locals.targetUser = targetUser;
     res.locals.roles = roles;
     return next();
   } catch (error) {
@@ -67,12 +68,12 @@ module.exports.validate = async (req, res, next) => {
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const { user, roles } = res.locals;
+  const { user: actor, targetUser, roles } = res.locals;
 
   try {
-    await user.setRoles(roles);
+    await targetUser.setRoles(roles);
 
-    const updatedUser = await User.findByPk(user.id, {
+    const updatedUser = await User.findByPk(targetUser.id, {
       attributes: ["id", "firstName", "lastName", "emailAddress", "pcoId"],
       include: [
         {
@@ -85,10 +86,19 @@ module.exports.invoke = async (req, res, next) => {
       order: [[{ model: Role, as: "roles" }, "name", "ASC"]],
     });
 
+    const io = req.app.get("io");
+    const rotatedTargetToken = await rotateUserToken(updatedUser.id, {
+      io,
+      reason: "role_updated",
+    });
+    const refreshedToken =
+      Number(actor?.id) === Number(updatedUser?.id) ? rotatedTargetToken : null;
+
     res.send({
       status: 200,
       data: {
         user: updatedUser,
+        token: refreshedToken,
       },
     });
 

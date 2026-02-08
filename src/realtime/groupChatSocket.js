@@ -62,6 +62,8 @@ function setupGroupChatSocket(io) {
   });
 
   io.on("connection", (socket) => {
+    socket.join(`user:${socket.user.id}`);
+
     socket.on("join-group-chat", async ({ groupId }, callback) => {
       try {
         const normalizedGroupId = Number(groupId);

@@ -35,6 +35,9 @@ module.exports = {
       "delete_group",
       "read_own_group",
       "read_all_groups",
+      "create_group_topic",
+      "read_group_topics",
+      "read_all_group_topics",
     ];
 
     const rolePermissionMap = {
@@ -51,9 +54,11 @@ module.exports = {
         "read_all_tithe",
         "read_own_tithe",
         "get_all_group",
+        "create_group_topic",
         "read_own_group",
         "read_all_groups",
         "join_group",
+        "read_group_topics",
       ],
       ACCOUNTANT: [
         "read_all_users",
@@ -63,10 +68,19 @@ module.exports = {
         "read_all_tithe",
         "read_own_tithe",
         "get_all_group",
+        "create_group_topic",
         "read_own_group",
         "read_all_groups",
+        "read_group_topics",
       ],
-      ENDUSER: ["get_user", "read_own_tithe", "read_own_group", "join_group"],
+      ENDUSER: [
+        "get_user",
+        "read_own_tithe",
+        "read_own_group",
+        "create_group_topic",
+        "join_group",
+        "read_group_topics",
+      ],
     };
 
     const roleAliasMap = {

@@ -38,6 +38,21 @@ const PERMISSIONS = [
   { method: "delete_group", name: "Delete Group", resource: "group" },
   { method: "read_own_group", name: "Read Own Group", resource: "group" },
   { method: "read_all_groups", name: "Read All Groups", resource: "group" },
+  {
+    method: "create_group_topic",
+    name: "Create Group Topic",
+    resource: "group_topic",
+  },
+  {
+    method: "read_group_topics",
+    name: "Read Group Topics",
+    resource: "group_topic",
+  },
+  {
+    method: "read_all_group_topics",
+    name: "Read All Group Topics",
+    resource: "group_topic",
+  },
 ];
 
 /** @type {import('sequelize-cli').Migration} */
