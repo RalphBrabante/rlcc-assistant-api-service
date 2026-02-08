@@ -128,27 +128,5 @@ module.exports = {
 
     await safeRemoveConstraint("EventUsers", "fk_event_users_event_id");
     await safeRemoveConstraint("EventUsers", "fk_event_users_user_id");
-
-    // best-effort rollback of Tithes shape
-    await queryInterface.changeColumn("Tithes", "userId", {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
-      },
-      onDelete: "NO ACTION",
-      onUpdate: "CASCADE",
-    });
-    await queryInterface.changeColumn("Tithes", "memberId", {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
-      },
-      onDelete: "NO ACTION",
-      onUpdate: "CASCADE",
-    });
   },
 };
