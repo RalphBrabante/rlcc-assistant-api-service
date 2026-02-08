@@ -2,7 +2,7 @@
 const amqp = require("amqplib");
 const bcrypt = require("bcrypt");
 
-const { User } = require("../models");
+const { User, Role, UserRoles } = require("../models");
 const { invalidateResource } = require("../services/cacheService");
 
 async function usersMigration() {
@@ -21,6 +21,32 @@ async function usersMigration() {
     channel.prefetch(1);
 
     console.log(`👂 Waiting for messages in queue: ${queue}`);
+    const endUserRole = await Role.findOne({
+      where: { name: "ENDUSER" },
+      attributes: ["id"],
+    });
+
+    if (!endUserRole) {
+      throw new Error(
+        "ENDUSER role not found. Seed roles first before running PCO migration."
+      );
+    }
+
+    const ensureEndUserRole = async (userId) => {
+      const existing = await UserRoles.findOne({
+        where: {
+          userId,
+          roleId: endUserRole.id,
+        },
+      });
+
+      if (!existing) {
+        await UserRoles.create({
+          userId,
+          roleId: endUserRole.id,
+        });
+      }
+    };
 
     // consume messages
     channel.consume(queue, async (msg) => {
@@ -63,7 +89,7 @@ async function usersMigration() {
                 ? new Date(qUser.attributes.anniversary)
                 : null,
               gender: qUser.attributes.gender,
-              nickname: qUser?.attributes?.nickname
+              nickName: qUser?.attributes?.nickname
                 ? qUser?.attributes?.nickname
                 : null,
               avatar: qUser.attributes.avatar,
@@ -71,6 +97,7 @@ async function usersMigration() {
               birthDate: new Date(qUser.attributes.birthdate),
             });
 
+            await ensureEndUserRole(user.id);
             console.log(user.id + " " + user.firstName);
           } else {
             dbUser.set({
@@ -83,7 +110,7 @@ async function usersMigration() {
                 ? new Date(qUser.attributes.anniversary)
                 : null,
               gender: qUser.attributes.gender,
-              nickname: qUser?.attributes?.nickname
+              nickName: qUser?.attributes?.nickname
                 ? qUser?.attributes?.nickname
                 : null,
               avatar: qUser.attributes.avatar,
@@ -92,6 +119,7 @@ async function usersMigration() {
             });
 
             await dbUser.save();
+            await ensureEndUserRole(dbUser.id);
           }
 
           await invalidateResource("users");
