@@ -26,6 +26,8 @@ const ROLE_PERMISSION_MAP = {
     "create_group_topic",
     "read_group_topics",
     "read_all_group_topics",
+    "delete_group_topic",
+    "create_bug_report",
   ],
   SUPERUSER: [
     "read_all_users",
@@ -52,6 +54,8 @@ const ROLE_PERMISSION_MAP = {
     "create_group_topic",
     "read_group_topics",
     "read_all_group_topics",
+    "delete_group_topic",
+    "create_bug_report",
   ],
   ENCODER: [
     "read_all_users",
@@ -69,6 +73,7 @@ const ROLE_PERMISSION_MAP = {
     "read_own_group",
     "read_all_groups",
     "read_group_topics",
+    "create_bug_report",
   ],
   ACCOUNTANT: [
     "read_all_users",
@@ -82,6 +87,7 @@ const ROLE_PERMISSION_MAP = {
     "read_own_group",
     "read_all_groups",
     "read_group_topics",
+    "create_bug_report",
   ],
   ENDUSER: [
     "get_user",
@@ -90,6 +96,7 @@ const ROLE_PERMISSION_MAP = {
     "create_group_topic",
     "join_group",
     "read_group_topics",
+    "create_bug_report",
   ],
 };
 

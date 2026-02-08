@@ -18,6 +18,7 @@ const deleteGroupMessage = require("../controllers/groupChat/deleteGroupMessage"
 const getGroupTopics = require("../controllers/groupTopic/getGroupTopics");
 const createGroupTopic = require("../controllers/groupTopic/createGroupTopic");
 const getAllGroupTopics = require("../controllers/groupTopic/getAllGroupTopics");
+const deleteGroupTopic = require("../controllers/groupTopic/deleteGroupTopic");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
@@ -25,6 +26,8 @@ const initUserResource = require("../middlewares/initUserResource");
 const initGroupChatAccess = require("../middlewares/initGroupChatAccess");
 const initGroupTopicCreateAccess = require("../middlewares/initGroupTopicCreateAccess");
 const initGroupTopicReadAccess = require("../middlewares/initGroupTopicReadAccess");
+const initGroupTopicResource = require("../middlewares/initGroupTopicResource");
+const initGroupTopicDeleteAccess = require("../middlewares/initGroupTopicDeleteAccess");
 const asyncHandler = require("../utils/asyncHandler");
 const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
@@ -84,6 +87,18 @@ router.post(
   invalidateCache(["group-topics"]),
   createGroupTopic.validate,
   createGroupTopic.invoke
+);
+
+router.delete(
+  "/:id/topics/:topicId",
+  authenticate,
+  initGroupResource,
+  initGroupTopicReadAccess,
+  initGroupTopicResource,
+  initGroupTopicDeleteAccess,
+  invalidateCache(["group-topics"]),
+  deleteGroupTopic.validate,
+  deleteGroupTopic.invoke
 );
 
 router.get(

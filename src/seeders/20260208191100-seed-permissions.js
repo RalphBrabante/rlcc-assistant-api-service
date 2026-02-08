@@ -53,6 +53,16 @@ const PERMISSIONS = [
     name: "Read All Group Topics",
     resource: "group_topic",
   },
+  {
+    method: "delete_group_topic",
+    name: "Delete Group Topic",
+    resource: "group_topic",
+  },
+  {
+    method: "create_bug_report",
+    name: "Create Bug Report",
+    resource: "bug_report",
+  },
 ];
 
 /** @type {import('sequelize-cli').Migration} */

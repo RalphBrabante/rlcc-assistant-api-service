@@ -10,6 +10,7 @@ const groupRoute = require("./routes/groupRoute");
 const pocRoute = require("./routes/pocRoute");
 const queueRoute = require("./routes/queueRoute");
 const roleRoute = require("./routes/roleRoute");
+const bugReportRoute = require("./routes/bugReportRoute");
 
 router.use("/tithes", titheRoute);
 router.use("/users", userRoute);
@@ -20,5 +21,6 @@ router.use("/groups", groupRoute);
 router.use("/pco", pocRoute);
 router.use("/queues", queueRoute);
 router.use("/roles", roleRoute);
+router.use("/bug-reports", bugReportRoute);
 
 module.exports = router;

@@ -38,6 +38,8 @@ module.exports = {
       "create_group_topic",
       "read_group_topics",
       "read_all_group_topics",
+      "delete_group_topic",
+      "create_bug_report",
     ];
 
     const rolePermissionMap = {
@@ -59,6 +61,7 @@ module.exports = {
         "read_all_groups",
         "join_group",
         "read_group_topics",
+        "create_bug_report",
       ],
       ACCOUNTANT: [
         "read_all_users",
@@ -72,6 +75,7 @@ module.exports = {
         "read_own_group",
         "read_all_groups",
         "read_group_topics",
+        "create_bug_report",
       ],
       ENDUSER: [
         "get_user",
@@ -80,6 +84,7 @@ module.exports = {
         "create_group_topic",
         "join_group",
         "read_group_topics",
+        "create_bug_report",
       ],
     };
 

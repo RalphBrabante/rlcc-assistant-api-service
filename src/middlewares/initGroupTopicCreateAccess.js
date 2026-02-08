@@ -12,9 +12,9 @@ module.exports = async (req, res, next) => {
 
   const roles = Array.isArray(user.roles) ? user.roles : [];
   const isPrivileged = roles.includes("SUPERUSER") || roles.includes("ADMINISTRATOR");
-  const isLeaderOrOwner = group.leaderId === user.id || group.userId === user.id;
+  const isLeader = Number(group.leaderId) === Number(user.id);
 
-  if (!isPrivileged && !isLeaderOrOwner) {
+  if (!isPrivileged && !isLeader) {
     return next({
       status: 403,
       message:
