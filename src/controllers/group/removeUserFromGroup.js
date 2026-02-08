@@ -2,14 +2,29 @@
 const { GroupUsers } = require("../../models");
 
 module.exports.validate = async (req, res, next) => {
-  const { group } = res.locals;
+  const { group, user } = res.locals;
   const { userId } = req.params;
+  const parsedUserId = Number(userId);
+
+  if (!Number.isInteger(parsedUserId) || parsedUserId < 1) {
+    return next({
+      status: 400,
+      message: "Invalid userId parameter.",
+    });
+  }
+
+  if (user?.id === parsedUserId) {
+    return next({
+      status: 403,
+      message: "You cannot remove yourself from this circle.",
+    });
+  }
 
   try {
     const membership = await GroupUsers.findOne({
       where: {
         groupId: group.id,
-        userId,
+        userId: parsedUserId,
       },
     });
 

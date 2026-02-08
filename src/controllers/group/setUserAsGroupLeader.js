@@ -2,54 +2,67 @@ const { GroupUsers } = require("../../models");
 module.exports.validate = async (req, res, next) => {
   const { userId } = req.params;
   const { group } = res.locals;
+  const parsedUserId = Number(userId);
+
+  if (!Number.isInteger(parsedUserId) || parsedUserId < 1) {
+    return next({
+      status: 400,
+      message: "Invalid userId parameter.",
+    });
+  }
 
   try {
     const isUserAssignedToGroup = await GroupUsers.findOne({
-      where: { groupId: group.id, userId },
+      where: { groupId: group.id, userId: parsedUserId },
+      attributes: ["id"],
     });
 
     if (!isUserAssignedToGroup) {
-      throw new Error("This user isn't assigned to this group yet.");
+      return next({
+        status: 403,
+        message: "This user isn't assigned to this group yet.",
+      });
     }
 
-    if (!group.leaderId) {
-      if (group.leaderId === userId) {
-        throw new Error("This user is already the leader of this group.");
-      }
-    } else {
-      if (group.leaderId === userId) {
-        throw new Error("You are already the leader of this group.");
-      }
-
-      if (group.leaderId) {
-        throw new Error("This group already has its leader.");
-      }
+    if (group.leaderId === parsedUserId) {
+      return next({
+        status: 409,
+        message: "This user is already the administrator of this group.",
+      });
     }
 
-    next();
+    res.locals.targetLeaderId = parsedUserId;
+    return next();
   } catch (error) {
     return next({
-      status: 401,
+      status: 500,
       message: error.message,
     });
   }
 };
 
 module.exports.invoke = async (req, res, next) => {
-  const { userId } = req.params;
   const { group } = res.locals;
+  const { targetLeaderId } = res.locals;
 
   try {
     group.set({
-      leaderId: userId,
+      leaderId: targetLeaderId,
     });
 
     await group.save();
 
-    res.sendStatus(204);
+    res.send({
+      status: 200,
+      data: {
+        id: group.id,
+        leaderId: group.leaderId,
+      },
+    });
+    return next();
   } catch (error) {
     return next({
-      status: 401,
+      status: 500,
       message: error.message,
     });
   }

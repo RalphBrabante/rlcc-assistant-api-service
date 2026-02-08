@@ -82,11 +82,23 @@ router.delete(
 );
 
 router.patch(
+  "/:id/administrator/:userId",
+  authenticate,
+  authorize(["update_group"]),
+  initUserResource,
+  initGroupResource,
+  invalidateCache(["groups"]),
+  setUserAsGroupLeader.validate,
+  setUserAsGroupLeader.invoke
+);
+
+router.patch(
   "/:id/user/:userId",
   authenticate,
   authorize(["update_group"]),
   initUserResource,
   initGroupResource,
+  invalidateCache(["groups"]),
   setUserAsGroupLeader.validate,
   setUserAsGroupLeader.invoke
 );

@@ -9,6 +9,7 @@ const configurationRoute = require("./routes/configurationRoute");
 const groupRoute = require("./routes/groupRoute");
 const pocRoute = require("./routes/pocRoute");
 const queueRoute = require("./routes/queueRoute");
+const roleRoute = require("./routes/roleRoute");
 
 router.use("/tithes", titheRoute);
 router.use("/users", userRoute);
@@ -18,5 +19,6 @@ router.use("/configurations", configurationRoute);
 router.use("/groups", groupRoute);
 router.use("/pco", pocRoute);
 router.use("/queues", queueRoute);
+router.use("/roles", roleRoute);
 
 module.exports = router;
