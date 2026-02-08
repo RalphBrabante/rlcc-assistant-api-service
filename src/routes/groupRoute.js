@@ -11,6 +11,7 @@ const setUserAsGroupLeader = require("../controllers/group/setUserAsGroupLeader"
 const deleteGroup = require("../controllers/group/deleteGroup");
 const getUnassignedUsers = require("../controllers/group/getUnassignedUsers");
 const joinGroup = require("../controllers/group/joinGroup");
+const removeUserFromGroup = require("../controllers/group/removeUserFromGroup");
 const authenticate = require("../middlewares/authenticate");
 const authorize = require("../middlewares/authorize");
 const initGroupResource = require("../middlewares/initGroupResource");
@@ -54,6 +55,17 @@ router.patch(
   initGroupResource,
   setUserAsGroupLeader.validate,
   setUserAsGroupLeader.invoke
+);
+
+router.delete(
+  "/:id/user/:userId",
+  authenticate,
+  authorize(["assign_user_to_group"]),
+  initUserResource,
+  initGroupResource,
+  invalidateCache(["groups"]),
+  removeUserFromGroup.validate,
+  removeUserFromGroup.invoke
 );
 
 router.patch(

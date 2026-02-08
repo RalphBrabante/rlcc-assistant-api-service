@@ -1,35 +1,56 @@
 "use strict";
 const jwt = require("jsonwebtoken");
 const { Token } = require("../models");
+
+const JWT_SECRET = process.env.JWT_SECRET || "secretKey";
+
+function extractBearerToken(authorization = "") {
+  const [scheme, value] = authorization.split(" ");
+  if (!scheme || scheme.toLowerCase() !== "bearer" || !value) return null;
+  return value;
+}
+
 module.exports = async (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Expect "Bearer <token>"
+  try {
+    const token = extractBearerToken(req.headers.authorization);
 
-  if (!token) {
-    return res.status(401).json({ message: "Access token required" });
-  }
-
-  const dbToken = await Token.findOne({
-    where: {
-      token,
-    },
-  });
-
-  if (!dbToken) {
-    return next({ status: 401, message: "Access token invalid." });
-  }
-  jwt.verify(token, "secretKey", (err, user) => {
-    if (err) {
-      return res.status(401).json({ message: "Invalid or expired token" });
+    if (!token) {
+      return next({ status: 401, message: "Access token required." });
     }
 
-    // Attach user payload to request object
+    const dbToken = await Token.findOne({
+      where: { token },
+      attributes: ["id"],
+    });
+
+    if (!dbToken) {
+      return next({ status: 401, message: "Access token invalid." });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const permissions = Array.isArray(decoded.permissions)
+      ? [...new Set(decoded.permissions)]
+      : [];
+    const roles = Array.isArray(decoded.roles) ? [...new Set(decoded.roles)] : [];
+
     res.locals.user = {
-      id: user.id,
-      name: user.name,
-      permissions: user.permissions,
-      roles: user.roles,
+      id: decoded.id,
+      name: decoded.name,
+      permissions,
+      permissionSet: new Set(permissions),
+      roles,
     };
-    next();
-  });
+
+    return next();
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return next({ status: 401, message: "Token expired." });
+    }
+
+    if (error.name === "JsonWebTokenError") {
+      return next({ status: 401, message: "Invalid token." });
+    }
+
+    return next(error);
+  }
 };

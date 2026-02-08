@@ -7,21 +7,41 @@
  *
  */
 
-module.exports = (allowedPermissions) => {
+module.exports = (allowedPermissions, options = {}) => {
+  const required = Array.isArray(allowedPermissions)
+    ? [...new Set(allowedPermissions.filter(Boolean))]
+    : [];
+  const match = options.match === "all" ? "all" : "any";
+
   return async (req, res, next) => {
-    const { user } = res.locals;
+    try {
+      const { user } = res.locals;
 
-    const userPermissions = user.permissions;
+      if (!user) {
+        return next({ status: 401, message: "Unauthorized." });
+      }
 
-    // check if ALL required permissions exist in userPermissions
-    const hasPermissions = allowedPermissions.every((p) =>
-      userPermissions.includes(p)
-    );
+      if (required.length === 0) {
+        return next();
+      }
 
-    if (!hasPermissions) {
-      return res.status(403).json({ message: "Forbidden" });
+      const permissionSet =
+        user.permissionSet instanceof Set
+          ? user.permissionSet
+          : new Set(Array.isArray(user.permissions) ? user.permissions : []);
+
+      const hasPermissions =
+        match === "all"
+          ? required.every((permission) => permissionSet.has(permission))
+          : required.some((permission) => permissionSet.has(permission));
+
+      if (!hasPermissions) {
+        return next({ status: 403, message: "Forbidden." });
+      }
+
+      return next();
+    } catch (error) {
+      return next(error);
     }
-
-    next();
   };
 };
