@@ -36,6 +36,9 @@ function main() {
   process.stdout.write("[db:init] Running db:migrate...\n");
   run("npx sequelize-cli db:migrate");
 
+  process.stdout.write("[db:init] Running db:seed:all...\n");
+  run("npx sequelize-cli db:seed:all");
+
   process.stdout.write("[db:init] Database is ready.\n");
 }
 

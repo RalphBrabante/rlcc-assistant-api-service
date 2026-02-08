@@ -26,7 +26,7 @@ const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware")
 router.get(
   "",
   authenticate,
-  authorize(["get_all_group"]),
+  authorize(["get_all_group", "read_own_group"]),
   cacheRead("groups"),
   getAndCountGroup.validate,
   getAndCountGroup.invoke
@@ -133,7 +133,7 @@ router.post(
 router.get(
   "/count",
   authenticate,
-  authorize(["get_all_group"]),
+  authorize(["get_all_group", "read_own_group"]),
   countAllActiveGroups.validate,
   countAllActiveGroups.invoke
 );

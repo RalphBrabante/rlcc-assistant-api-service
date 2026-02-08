@@ -24,6 +24,7 @@
   "main": "index.js",
   "scripts": {
     "db:init": "node ./src/scripts/dbInit.js",
+    "db:seed": "npx sequelize-cli db:seed:all",
     "dev": " NODE_ENV=development nodemon --inspect=0.0.0.0:9229  ./src/index.js",
     "dev:boot": "npm run db:init && npm run dev"
   },
