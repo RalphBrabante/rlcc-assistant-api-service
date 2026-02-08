@@ -4,6 +4,7 @@ const amqp = require("amqplib");
 const nodemailer = require("nodemailer");
 const emailTitheDetails = require("../utils/emailTitheDetails");
 const { invalidateResource } = require("../services/cacheService");
+const { getBooleanConfig } = require("../utils/runtimeConfiguration");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
@@ -60,14 +61,17 @@ async function titheConsumer() {
               },
             ],
           });
-          emailTitheDetails(
-            newTithe.giver.firstName,
-            newTithe.giver.emailAddress,
-            newTithe.amount,
-            newTithe.titheType.name,
-            newTithe.createdAt,
-            transporter
-          );
+          const devModeEnabled = await getBooleanConfig("dev_mode", false);
+          if (!devModeEnabled) {
+            emailTitheDetails(
+              newTithe.giver.firstName,
+              newTithe.giver.emailAddress,
+              newTithe.amount,
+              newTithe.titheType.name,
+              newTithe.createdAt,
+              transporter
+            );
+          }
           await invalidateResource("tithes");
           channel.ack(msg);
         } catch (err) {

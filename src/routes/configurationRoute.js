@@ -3,11 +3,19 @@ const express = require("express");
 const router = express.Router();
 
 const getServerStatus = require("../controllers/configuration/getServerStatus");
+const getPublicRuntimeSettings = require("../controllers/configuration/getPublicRuntimeSettings");
+const updateServerConfigurations = require("../controllers/configuration/updateServerConfigurations");
 
 const authenticate = require("../middlewares/authenticate");
+const requireAdminOrSuperUser = require("../middlewares/requireAdminOrSuperUser");
 
-const authorize = require("../middlewares/authorize");
-const { cacheRead } = require("../middlewares/cacheMiddleware");
+const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
+
+router.get(
+  "/public",
+  getPublicRuntimeSettings.validate,
+  getPublicRuntimeSettings.invoke
+);
 
 router.get(
   "",
@@ -15,6 +23,15 @@ router.get(
   cacheRead("configurations"),
   getServerStatus.validate,
   getServerStatus.invoke
+);
+
+router.patch(
+  "",
+  authenticate,
+  requireAdminOrSuperUser,
+  invalidateCache(["configurations"]),
+  updateServerConfigurations.validate,
+  updateServerConfigurations.invoke
 );
 
 module.exports = router;

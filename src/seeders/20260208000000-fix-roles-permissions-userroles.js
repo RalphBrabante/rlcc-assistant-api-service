@@ -6,7 +6,7 @@ module.exports = {
     const now = new Date();
 
     const requiredRoles = [
-      "ADMIN",
+      "ADMINISTRATOR",
       "SUPERUSER",
       "ENCODER",
       "ACCOUNTANT",
@@ -39,7 +39,7 @@ module.exports = {
 
     const rolePermissionMap = {
       SUPERUSER: permissionMethods,
-      ADMIN: permissionMethods,
+      ADMINISTRATOR: permissionMethods,
       ENCODER: [
         "read_all_users",
         "get_user",
@@ -70,7 +70,7 @@ module.exports = {
     };
 
     const roleAliasMap = {
-      ADMINISTRATOR: "ADMIN",
+      ADMIN: "ADMINISTRATOR",
       MEMBER: "ENDUSER",
       USER: "ENDUSER",
     };

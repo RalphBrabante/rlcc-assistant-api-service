@@ -3,6 +3,7 @@ const { User, Sequelize, Role, Permission } = require("../../models");
 const { Op } = Sequelize;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { getBooleanConfig } = require("../../utils/runtimeConfiguration");
 
 module.exports.validate = async (req, res, next) => {
   const { credentials } = req.body;
@@ -82,6 +83,14 @@ module.exports.invoke = async (req, res, next) => {
           rolesActions.push(perm.method);
         }
       }
+    }
+
+    const maintenanceModeEnabled = await getBooleanConfig("maintenance_mode", false);
+    if (maintenanceModeEnabled) {
+      return next({
+        status: 503,
+        message: "Maintenance mode is active. Logins are temporarily disabled.",
+      });
     }
 
     await (async () => {

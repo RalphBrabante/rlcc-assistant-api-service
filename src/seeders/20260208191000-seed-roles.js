@@ -4,7 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     const now = new Date();
-    const roles = ["ADMIN", "SUPERUSER", "ENCODER", "ACCOUNTANT", "ENDUSER"];
+    const roles = ["ADMINISTRATOR", "SUPERUSER", "ENCODER", "ACCOUNTANT", "ENDUSER"];
 
     const [existingRoles] = await queryInterface.sequelize.query(
       "SELECT name FROM `Roles` WHERE name IN (:roles)",
@@ -29,7 +29,7 @@ module.exports = {
     await queryInterface.bulkDelete(
       "Roles",
       {
-        name: ["ADMIN", "SUPERUSER", "ENCODER", "ACCOUNTANT", "ENDUSER"],
+        name: ["ADMINISTRATOR", "SUPERUSER", "ENCODER", "ACCOUNTANT", "ENDUSER"],
       },
       {}
     );

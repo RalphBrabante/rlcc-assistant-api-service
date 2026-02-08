@@ -2,6 +2,7 @@ const { Tithe, TitheType, User } = require("../../models");
 const tithetype = require("../../models/tithetype");
 
 const emailTitheDetails = require("../../utils/emailTitheDetails");
+const { getBooleanConfig } = require("../../utils/runtimeConfiguration");
 
 module.exports.cacheRead = async (req, res, next) => {
   next();
@@ -35,14 +36,17 @@ module.exports.invoke = async (req, res, next) => {
       ],
     });
 
-    emailTitheDetails(
-      tithe.giver.firstName,
-      tithe.giver.emailAddress,
-      tithe.amount,
-      tithe.titheType.name,
-      tithe.dateReceived,
-      req.transporter
-    );
+    const devModeEnabled = await getBooleanConfig("dev_mode", false);
+    if (!devModeEnabled) {
+      emailTitheDetails(
+        tithe.giver.firstName,
+        tithe.giver.emailAddress,
+        tithe.amount,
+        tithe.titheType.name,
+        tithe.dateReceived,
+        req.transporter
+      );
+    }
 
     res.send({
       status: 200,
