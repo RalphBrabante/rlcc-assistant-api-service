@@ -20,7 +20,7 @@ module.exports = function emailBugReportNotification({
   transporter,
 }) {
   if (!to || !transporter || !report) {
-    return;
+    return Promise.resolve(false);
   }
 
   const templatePath = path.resolve(
@@ -63,9 +63,11 @@ module.exports = function emailBugReportNotification({
     html: htmlTemplate,
   };
 
-  transporter.sendMail(mailOptions, (error) => {
-    if (error) {
+  return transporter
+    .sendMail(mailOptions)
+    .then(() => true)
+    .catch((error) => {
       console.error("Error sending bug report notification:", error);
-    }
-  });
+      return false;
+    });
 };

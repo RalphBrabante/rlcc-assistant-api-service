@@ -4,6 +4,7 @@ const { BugReport, User, Role, Sequelize } = require("../../models");
 const { getBooleanConfig } = require("../../utils/runtimeConfiguration");
 const emailBugReportNotification = require("../../utils/emailBugReportNotification");
 const { Op } = Sequelize;
+const PRIVILEGED_ROLE_NAMES = ["SUPERUSER", "ADMINISTRATOR", "ADMINSTRATOR"];
 
 const ALLOWED_SCOPES = new Set(["client", "server"]);
 const ALLOWED_SEVERITIES = new Set(["low", "medium", "high", "critical"]);
@@ -104,9 +105,9 @@ module.exports.invoke = async (req, res, next) => {
 
     const devModeEnabled = await getBooleanConfig("dev_mode", false);
     if (!devModeEnabled) {
-      const adminAndSuperUsers = await User.findAll({
+      let adminAndSuperUsers = await User.findAll({
         where: {
-          isActive: true,
+          [Op.or]: [{ isActive: true }, { isActive: null }],
         },
         attributes: ["id", "firstName", "lastName", "emailAddress"],
         include: [
@@ -117,7 +118,7 @@ module.exports.invoke = async (req, res, next) => {
             through: { attributes: [] },
             where: {
               name: {
-                [Op.in]: ["SUPERUSER", "ADMINISTRATOR"],
+                [Op.in]: PRIVILEGED_ROLE_NAMES,
               },
             },
             required: true,
@@ -125,10 +126,31 @@ module.exports.invoke = async (req, res, next) => {
         ],
       });
 
+      if (!adminAndSuperUsers.length) {
+        adminAndSuperUsers = await User.findAll({
+          attributes: ["id", "firstName", "lastName", "emailAddress"],
+          include: [
+            {
+              model: Role,
+              as: "roles",
+              attributes: ["id", "name"],
+              through: { attributes: [] },
+              where: {
+                name: {
+                  [Op.in]: PRIVILEGED_ROLE_NAMES,
+                },
+              },
+              required: true,
+            },
+          ],
+        });
+      }
+
       const seenAddresses = new Set();
       const reporterName = createdBugReport?.reporter
         ? `${createdBugReport.reporter.firstName} ${createdBugReport.reporter.lastName}`.trim()
         : `User #${user.id}`;
+      const sendPromises = [];
 
       for (const recipient of adminAndSuperUsers) {
         const emailAddress = String(recipient.emailAddress || "").trim().toLowerCase();
@@ -137,13 +159,19 @@ module.exports.invoke = async (req, res, next) => {
         }
         seenAddresses.add(emailAddress);
 
-        emailBugReportNotification({
+        sendPromises.push(
+          emailBugReportNotification({
           recipientName: `${recipient.firstName || ""} ${recipient.lastName || ""}`.trim() || "Team Member",
           to: emailAddress,
           report: createdBugReport,
           reporterName,
           transporter: req.transporter,
-        });
+          })
+        );
+      }
+
+      if (sendPromises.length) {
+        await Promise.allSettled(sendPromises);
       }
     }
 
