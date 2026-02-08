@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      GroupType.belongsTo(models.Group, {
+      GroupType.hasMany(models.Group, {
         foreignKey: "groupTypeId",
-        as: "group",
-        onDelete: "NO ACTION",
+        as: "groups",
+        onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
     }

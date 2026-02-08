@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       Event.belongsToMany(models.User, {
         through: "EventUsers",
         foreignKey: "eventId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       });
     }
   }

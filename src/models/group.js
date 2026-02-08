@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         through: "GroupUsers",
         as: "groupMembers",
         foreignKey: "groupId",
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       });
 
@@ -39,10 +39,10 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
-      Group.hasOne(models.GroupType, {
+      Group.belongsTo(models.GroupType, {
         foreignKey: "groupTypeId",
         as: "groupType",
-        onDelete: "NO ACTION",
+        onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
       
@@ -77,6 +77,16 @@ module.exports = (sequelize, DataTypes) => {
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+      },
+      groupTypeId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "GroupType",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
     },
     {

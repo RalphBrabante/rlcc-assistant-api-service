@@ -19,14 +19,14 @@ module.exports = (sequelize, DataTypes) => {
       Tithe.belongsTo(models.User, {
         foreignKey: "userId",
         as: "encoder",
-        onDelete: "NO ACTION",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
       });
 
       Tithe.belongsTo(models.User, {
         foreignKey: "memberId",
         as: "giver",
-        onDelete: "NO ACTION",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
       });
     }
@@ -39,22 +39,22 @@ module.exports = (sequelize, DataTypes) => {
       },
       userId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "User",
           key: "id",
         },
-        onDelete: "NO ACTION",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
       memberId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "User",
           key: "id",
         },
-        onDelete: "NO ACTION",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
       isActive: {

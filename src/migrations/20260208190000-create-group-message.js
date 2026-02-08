@@ -64,10 +64,8 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.removeIndex(
-      "GroupMessages",
-      "idx_group_messages_group_created_at"
-    );
+    // Dropping the table also drops dependent indexes.
+    // Removing the index first may fail because MySQL can bind it to FK checks.
     await queryInterface.dropTable("GroupMessages");
   },
 };

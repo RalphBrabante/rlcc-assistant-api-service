@@ -13,6 +13,26 @@ module.exports = (sequelize, DataTypes) => {
   }
   EventUsers.init(
     {
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "User",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      },
+      eventId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Event",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      },
       role: {
         type: DataTypes.STRING,
         defaultValue: "attendee",
@@ -23,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       checkedInAt: DataTypes.DATE,
       checkedOutAt: DataTypes.DATE,
+      checkInMethod: DataTypes.STRING,
       notes: DataTypes.TEXT,
     },
     {

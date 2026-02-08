@@ -34,6 +34,8 @@ module.exports = {
         {
           name: "maintenance_mode",
           value: "false",
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ],
       {}

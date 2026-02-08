@@ -19,6 +19,7 @@ module.exports = {
     await queryInterface.addColumn("Users", "pcoId", {
       type: Sequelize.INTEGER,
       allowNull: true,
+      unique: true,
       after: "isActive",
     });
 
@@ -60,6 +61,49 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
+
+    // Normalize data first so NOT NULL + UNIQUE rollback does not fail.
+    const [rows] = await queryInterface.sequelize.query(
+      "SELECT id, emailAddress FROM Users ORDER BY id ASC"
+    );
+
+    const normalizeEmail = (value, id) => {
+      const email = (value || "").trim().toLowerCase();
+      if (!email) {
+        return `rollback_user_${id}@local.invalid`;
+      }
+
+      const atIndex = email.indexOf("@");
+      if (atIndex <= 0 || atIndex === email.length - 1) {
+        return `rollback_user_${id}@local.invalid`;
+      }
+
+      return email;
+    };
+
+    const seen = new Map();
+    for (const row of rows) {
+      const normalized = normalizeEmail(row.emailAddress, row.id);
+      const count = seen.get(normalized) || 0;
+      seen.set(normalized, count + 1);
+
+      let finalEmail = normalized;
+      if (count > 0) {
+        const atIndex = normalized.indexOf("@");
+        const local = normalized.slice(0, atIndex);
+        const domain = normalized.slice(atIndex + 1);
+        finalEmail = `${local}+dup${row.id}@${domain}`;
+      }
+
+      if (finalEmail !== row.emailAddress) {
+        await queryInterface.sequelize.query(
+          "UPDATE Users SET emailAddress = :email WHERE id = :id",
+          {
+            replacements: { email: finalEmail, id: row.id },
+          }
+        );
+      }
+    }
 
     await queryInterface.changeColumn("Users", "emailAddress", {
       type: Sequelize.STRING,

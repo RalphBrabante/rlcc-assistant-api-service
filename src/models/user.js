@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Tithe, {
         foreignKey: "userId",
         as: "tithes",
-        onDelete: "NO ACTION",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
       });
 
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         through: "GroupUsers",
         as: "assignedGroup",
         foreignKey: "userId",
-        onDelete: "CASCADE",
+        onDelete: "NO ACTION",
         onUpdate: "CASCADE",
       });
 
@@ -63,6 +63,8 @@ module.exports = (sequelize, DataTypes) => {
       User.belongsToMany(models.Event, {
         through: "EventUsers",
         foreignKey: "userId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       });
     }
     // remove password from json response
@@ -120,10 +122,6 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           isEmail: true, // 👈 validates correct email format
         },
-      },
-      isActive: {
-        type: DataTypes.BOOLEAN,
-        allowNull: true,
       },
       isActive: {
         type: DataTypes.BOOLEAN,

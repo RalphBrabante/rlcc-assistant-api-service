@@ -38,6 +38,11 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
+
+    await queryInterface.addIndex("UserRoles", ["userId", "roleId"], {
+      unique: true,
+      name: "user_role_unique_index",
+    });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("UserRoles");

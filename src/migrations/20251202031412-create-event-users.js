@@ -11,17 +11,23 @@ module.exports = {
       },
       userId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Users",
-          key: "userId",
+          key: "id",
         },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       eventId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Events",
-          key: "eventId",
+          key: "id",
         },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
 
       role: {
@@ -65,6 +71,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+    });
+
+    await queryInterface.addIndex("EventUsers", ["eventId", "userId"], {
+      unique: true,
+      name: "event_user_unique_index",
     });
   },
   async down(queryInterface, Sequelize) {
