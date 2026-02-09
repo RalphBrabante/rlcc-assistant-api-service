@@ -66,6 +66,13 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
+      User.hasMany(models.GroupTopicComment, {
+        foreignKey: "createdBy",
+        as: "createdGroupTopicComments",
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE",
+      });
+
       User.hasMany(models.BugReport, {
         foreignKey: "userId",
         as: "bugReports",

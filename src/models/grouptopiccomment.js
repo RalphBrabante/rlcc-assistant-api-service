@@ -2,38 +2,45 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class GroupTopic extends Model {
+  class GroupTopicComment extends Model {
     static associate(models) {
-      GroupTopic.belongsTo(models.Group, {
-        foreignKey: "groupId",
-        as: "group",
+      GroupTopicComment.belongsTo(models.GroupTopic, {
+        foreignKey: "groupTopicId",
+        as: "topic",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
 
-      GroupTopic.belongsTo(models.User, {
+      GroupTopicComment.belongsTo(models.User, {
         foreignKey: "createdBy",
         as: "creator",
         onDelete: "SET NULL",
         onUpdate: "CASCADE",
       });
 
-      GroupTopic.hasMany(models.GroupTopicComment, {
-        foreignKey: "groupTopicId",
-        as: "comments",
+      GroupTopicComment.belongsTo(models.GroupTopicComment, {
+        foreignKey: "parentCommentId",
+        as: "parentComment",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+
+      GroupTopicComment.hasMany(models.GroupTopicComment, {
+        foreignKey: "parentCommentId",
+        as: "replies",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
     }
   }
 
-  GroupTopic.init(
+  GroupTopicComment.init(
     {
-      groupId: {
+      groupTopicId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Group",
+          model: "GroupTopics",
           key: "id",
         },
         onDelete: "CASCADE",
@@ -43,19 +50,25 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-          model: "User",
+          model: "Users",
           key: "id",
         },
         onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
-      title: {
-        type: DataTypes.STRING,
+      comment: {
+        type: DataTypes.TEXT,
         allowNull: false,
       },
-      description: {
-        type: DataTypes.TEXT,
+      parentCommentId: {
+        type: DataTypes.INTEGER,
         allowNull: true,
+        references: {
+          model: "GroupTopicComments",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -65,9 +78,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "GroupTopic",
+      modelName: "GroupTopicComment",
     }
   );
 
-  return GroupTopic;
+  return GroupTopicComment;
 };

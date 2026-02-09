@@ -1,6 +1,6 @@
 "use strict";
 
-const { GroupTopic, User } = require("../../models");
+const { GroupTopic, GroupTopicComment, User } = require("../../models");
 
 module.exports.validate = async (req, res, next) => {
   return next();
@@ -20,6 +20,36 @@ module.exports.invoke = async (req, res, next) => {
           model: User,
           as: "creator",
           attributes: ["id", "firstName", "lastName", "avatar"],
+        },
+        {
+          model: GroupTopicComment,
+          as: "comments",
+          where: { isActive: true, parentCommentId: null },
+          required: false,
+          separate: true,
+          order: [["createdAt", "DESC"]],
+          include: [
+            {
+              model: User,
+              as: "creator",
+              attributes: ["id", "firstName", "lastName", "avatar"],
+            },
+            {
+              model: GroupTopicComment,
+              as: "replies",
+              where: { isActive: true },
+              required: false,
+              separate: true,
+              order: [["createdAt", "DESC"]],
+              include: [
+                {
+                  model: User,
+                  as: "creator",
+                  attributes: ["id", "firstName", "lastName", "avatar"],
+                },
+              ],
+            },
+          ],
         },
       ],
       order: [["createdAt", "DESC"]],

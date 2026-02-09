@@ -17,6 +17,9 @@ const sendGroupMessage = require("../controllers/groupChat/sendGroupMessage");
 const deleteGroupMessage = require("../controllers/groupChat/deleteGroupMessage");
 const getGroupTopics = require("../controllers/groupTopic/getGroupTopics");
 const createGroupTopic = require("../controllers/groupTopic/createGroupTopic");
+const createGroupTopicComment = require("../controllers/groupTopic/createGroupTopicComment");
+const createGroupTopicCommentReply = require("../controllers/groupTopic/createGroupTopicCommentReply");
+const deleteGroupTopicComment = require("../controllers/groupTopic/deleteGroupTopicComment");
 const getAllGroupTopics = require("../controllers/groupTopic/getAllGroupTopics");
 const deleteGroupTopic = require("../controllers/groupTopic/deleteGroupTopic");
 const authenticate = require("../middlewares/authenticate");
@@ -26,6 +29,7 @@ const initUserResource = require("../middlewares/initUserResource");
 const initGroupChatAccess = require("../middlewares/initGroupChatAccess");
 const initGroupTopicCreateAccess = require("../middlewares/initGroupTopicCreateAccess");
 const initGroupTopicReadAccess = require("../middlewares/initGroupTopicReadAccess");
+const initGroupTopicCommentCreateAccess = require("../middlewares/initGroupTopicCommentCreateAccess");
 const initGroupTopicResource = require("../middlewares/initGroupTopicResource");
 const initGroupTopicDeleteAccess = require("../middlewares/initGroupTopicDeleteAccess");
 const asyncHandler = require("../utils/asyncHandler");
@@ -87,6 +91,42 @@ router.post(
   invalidateCache(["group-topics"]),
   createGroupTopic.validate,
   createGroupTopic.invoke
+);
+
+router.post(
+  "/:id/topics/:topicId/comments",
+  authenticate,
+  authorize(["read_group_topics", "read_all_group_topics"]),
+  initGroupResource,
+  initGroupTopicCommentCreateAccess,
+  initGroupTopicResource,
+  invalidateCache(["group-topics"]),
+  createGroupTopicComment.validate,
+  createGroupTopicComment.invoke
+);
+
+router.post(
+  "/:id/topics/:topicId/comments/:commentId/replies",
+  authenticate,
+  authorize(["read_group_topics", "read_all_group_topics"]),
+  initGroupResource,
+  initGroupTopicCommentCreateAccess,
+  initGroupTopicResource,
+  invalidateCache(["group-topics"]),
+  createGroupTopicCommentReply.validate,
+  createGroupTopicCommentReply.invoke
+);
+
+router.delete(
+  "/:id/topics/:topicId/comments/:commentId",
+  authenticate,
+  authorize(["read_group_topics", "read_all_group_topics"]),
+  initGroupResource,
+  initGroupTopicCommentCreateAccess,
+  initGroupTopicResource,
+  invalidateCache(["group-topics"]),
+  deleteGroupTopicComment.validate,
+  deleteGroupTopicComment.invoke
 );
 
 router.delete(
