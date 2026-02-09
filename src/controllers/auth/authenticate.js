@@ -6,6 +6,7 @@ const { getJwtSecret } = require("../../utils/jwtSecret");
 const { getBooleanConfig } = require("../../utils/runtimeConfiguration");
 const DUMMY_PASSWORD_HASH =
   "$2b$10$QgqdM9m5rxSLF9mfJLB3j.WSYIEr7g8xY8gPf4f9QWJfbVrIUQ8s2";
+const MAX_FAILED_LOGIN_ATTEMPTS = 5;
 
 module.exports.validate = async (req, res, next) => {
   const { credentials } = req.body;
@@ -28,7 +29,15 @@ module.exports.validate = async (req, res, next) => {
     where: {
       emailAddress: credentials.emailAddress,
     },
-    attributes: ["id", "emailAddress", "firstName", "lastName", "password"],
+    attributes: [
+      "id",
+      "emailAddress",
+      "firstName",
+      "lastName",
+      "password",
+      "failedLoginAttempts",
+      "lockedAt",
+    ],
     include: {
       model: Role,
       as: "roles",
@@ -57,9 +66,41 @@ module.exports.invoke = async (req, res, next) => {
     const passwordMatched = await bcrypt.compare(password, comparedHash);
 
     if (!user || !passwordMatched) {
+      if (user) {
+        const nextFailedAttempts = Number(user.failedLoginAttempts || 0) + 1;
+        const shouldLock = nextFailedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
+
+        await user.update({
+          failedLoginAttempts: nextFailedAttempts,
+          lockedAt: shouldLock ? new Date() : user.lockedAt,
+        });
+
+        if (shouldLock) {
+          return next({
+            status: 423,
+            message:
+              "Account locked due to too many invalid login attempts. Reset your password to unlock.",
+          });
+        }
+      }
+
       return next({
         status: 401,
         message: "Invalid email or password.",
+      });
+    }
+
+    if (user.lockedAt) {
+      return next({
+        status: 423,
+        message:
+          "Account locked due to too many invalid login attempts. Reset your password to unlock.",
+      });
+    }
+
+    if (Number(user.failedLoginAttempts || 0) > 0) {
+      await user.update({
+        failedLoginAttempts: 0,
       });
     }
 

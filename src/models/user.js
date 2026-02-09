@@ -80,6 +80,13 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
+      User.hasMany(models.PasswordResetToken, {
+        foreignKey: "userId",
+        as: "passwordResetTokens",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+
       // event relationship
       User.belongsToMany(models.Event, {
         through: "EventUsers",
@@ -151,6 +158,15 @@ module.exports = (sequelize, DataTypes) => {
       pcoId: {
         type: DataTypes.INTEGER,
         unique: true,
+      },
+      failedLoginAttempts: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      lockedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
       nickName: {
         type: DataTypes.STRING,

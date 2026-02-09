@@ -1,19 +1,36 @@
-// emailTransporter.js
 const nodemailer = require("nodemailer");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.hostinger.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "test@sysgage.com",
-    pass: "[s1Vss9pIVp",
-  },
-});
+let transporter;
 
-function mailerTransporter(req, res, next) {
-  req.transporter = transporter; // attach transporter to request object
-  next();
+function getTransporter() {
+  if (transporter) return transporter;
+
+  const host = String(process.env.SMTP_HOST || "").trim();
+  const port = Number(process.env.SMTP_PORT || 465);
+  const secureEnv = String(process.env.SMTP_SECURE || "").trim().toLowerCase();
+  const secure =
+    secureEnv === "true" ? true : secureEnv === "false" ? false : port === 465;
+  const user = String(process.env.SMTP_USER || "").trim();
+  const pass = String(process.env.SMTP_PASS || "").trim();
+
+  if (!host || !user || !pass || !Number.isFinite(port) || port < 1) {
+    return null;
+  }
+
+  transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    auth: { user, pass },
+  });
+
+  return transporter;
 }
 
-module.exports = mailerTransporter;
+module.exports = (req, res, next) => {
+  req.transporter = getTransporter();
+  next();
+};
