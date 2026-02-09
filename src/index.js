@@ -99,6 +99,11 @@ async function startServer() {
   app.use(responseFormatter);
 
   const amqp = await initAmqp();
+  if (!amqp) {
+    console.warn(
+      "⚠️ Queue service not connected at startup. Queue-backed endpoints will return 503."
+    );
+  }
 
   // Register middleware BEFORE routes
   app.use((req, res, next) => {

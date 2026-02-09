@@ -57,6 +57,12 @@ async function getPcoUsersByLastName(lastName) {
 }
 
 async function queuePcoUsersFromUrl(req, url) {
+  if (!req.amqp || !req.amqp.channel) {
+    const error = new Error("Queue service is unavailable.");
+    error.status = 503;
+    throw error;
+  }
+
   req.amqp.channel.assertQueue("usersMigrationQueue");
 
   return iteratePcoUsersByPage(url, async (users) => {
@@ -134,7 +140,7 @@ module.exports.preview = async (req, res, next) => {
     });
   } catch (error) {
     return next({
-      status: 520,
+      status: error.status || 520,
       message: error.message,
     });
   }
@@ -159,7 +165,7 @@ module.exports.previewAll = async (req, res, next) => {
     });
   } catch (error) {
     return next({
-      status: 520,
+      status: error.status || 520,
       message: error.message,
     });
   }

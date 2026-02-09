@@ -11,6 +11,12 @@ module.exports.invoke = async (req, res, next) => {
   const { tithes } = req.body; //expects an array of tithes
 
   try {
+    if (!req.amqp || !req.amqp.channel) {
+      const error = new Error("Queue service is unavailable.");
+      error.status = 503;
+      throw error;
+    }
+
     req.amqp.channel.assertQueue("createTitheQueue");
 
     const tithesWithUserId = tithes.map((t) => ({ ...t, userId: user.id }));
@@ -34,7 +40,7 @@ module.exports.invoke = async (req, res, next) => {
     next();
   } catch (error) {
     return next({
-      status: 401,
+      status: error.status || 401,
       message: error.message,
     });
   }

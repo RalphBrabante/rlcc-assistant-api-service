@@ -17,6 +17,7 @@ const initTitheResource = require("../middlewares/initTitheResource");
 const authorize = require("../middlewares/authorize");
 const requireAdminOrSuperUser = require("../middlewares/requireAdminOrSuperUser");
 const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
+const requireAmqp = require("../middlewares/requireAmqp");
 
 router.post(
   "",
@@ -32,6 +33,7 @@ router.post(
   authenticate,
   authorize(["create_tithe"]),
   invalidateCache(["tithes"]),
+  requireAmqp,
   createTitheInBulk.validate,
   createTitheInBulk.invoke
 );
