@@ -2,9 +2,10 @@
 const { GroupUsers } = require("../../models");
 
 module.exports.validate = async (req, res, next) => {
-  const { group, user } = res.locals;
+  const { group, user, authUser } = res.locals;
   const { userId } = req.params;
   const parsedUserId = Number(userId);
+  const actorId = Number(authUser?.id || user?.id || 0);
 
   if (!Number.isInteger(parsedUserId) || parsedUserId < 1) {
     return next({
@@ -13,7 +14,7 @@ module.exports.validate = async (req, res, next) => {
     });
   }
 
-  if (user?.id === parsedUserId) {
+  if (actorId === parsedUserId) {
     return next({
       status: 403,
       message: "You cannot remove yourself from this circle.",

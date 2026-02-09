@@ -16,12 +16,9 @@ module.exports.invoke = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const permissionSet =
-      user?.permissionSet instanceof Set
-        ? user.permissionSet
-        : new Set(Array.isArray(user?.permissions) ? user.permissions : []);
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
     const hasGlobalGroupAccess =
-      permissionSet.has("read_all_groups") || permissionSet.has("get_all_group");
+      roles.includes("SUPERUSER") || roles.includes("ADMINISTRATOR");
 
     const group = await Group.findByPk(id, {
       include: [
@@ -41,7 +38,6 @@ module.exports.invoke = async (req, res, next) => {
     }
 
     if (!hasGlobalGroupAccess) {
-      const isOwnerOrLeader = group.userId === user?.id || group.leaderId === user?.id;
       const membership = await GroupUsers.findOne({
         where: {
           groupId: group.id,
@@ -50,7 +46,7 @@ module.exports.invoke = async (req, res, next) => {
         attributes: ["id"],
       });
 
-      if (!isOwnerOrLeader && !membership) {
+      if (!membership) {
         return next({
           status: 403,
           message: "Forbidden. You are not assigned to this group.",

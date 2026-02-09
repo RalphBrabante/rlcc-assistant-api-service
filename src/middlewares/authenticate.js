@@ -40,6 +40,7 @@ module.exports = async (req, res, next) => {
       permissionSet: new Set(permissions),
       roles,
     };
+    res.locals.authUser = res.locals.user;
     res.locals.authToken = token;
 
     return next();

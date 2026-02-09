@@ -15,6 +15,7 @@ const getTitheReportByUserAndYear = require("../controllers/tithe/getTitheReport
 const authenticate = require("../middlewares/authenticate");
 const initTitheResource = require("../middlewares/initTitheResource");
 const authorize = require("../middlewares/authorize");
+const requireAdminOrSuperUser = require("../middlewares/requireAdminOrSuperUser");
 const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware");
 
 router.post(
@@ -59,6 +60,7 @@ router.get(
   "",
   authenticate,
   authorize(["read_all_tithe"]),
+  requireAdminOrSuperUser,
   cacheRead("tithes"),
   getAllTitheAndCount.validate,
   getAllTitheAndCount.invoke
@@ -77,6 +79,7 @@ router.get(
   "/report",
   authenticate,
   authorize(["read_all_tithe"]),
+  requireAdminOrSuperUser,
   cacheRead("tithes"),
   getTitheReportByYear.validate,
   getTitheReportByYear.invoke
