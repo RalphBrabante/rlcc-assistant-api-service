@@ -24,10 +24,10 @@ module.exports.validate = async (req, res, next) => {
       });
     }
 
-    if (role.name === "SUPERUSER") {
+    if (role.name === "SUPERUSER" || role.name === "ENDUSER") {
       return next({
         status: 403,
-        message: "The SUPERUSER role cannot be deleted.",
+        message: `The ${role.name} role cannot be deleted.`,
       });
     }
 

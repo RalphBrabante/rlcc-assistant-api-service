@@ -3,7 +3,6 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
-const requireSuperUser = require("../middlewares/requireSuperUser");
 const requireAdminOrSuperUser = require("../middlewares/requireAdminOrSuperUser");
 const getAllRolesWithPermissions = require("../controllers/role/getAllRolesWithPermissions");
 const getAllPermissions = require("../controllers/role/getAllPermissions");
@@ -41,7 +40,7 @@ router.patch(
 router.get(
   "",
   authenticate,
-  requireSuperUser,
+  requireAdminOrSuperUser,
   getAllRolesWithPermissions.validate,
   getAllRolesWithPermissions.invoke
 );
@@ -49,7 +48,7 @@ router.get(
 router.get(
   "/permissions",
   authenticate,
-  requireSuperUser,
+  requireAdminOrSuperUser,
   getAllPermissions.validate,
   getAllPermissions.invoke
 );
@@ -57,7 +56,7 @@ router.get(
 router.post(
   "",
   authenticate,
-  requireSuperUser,
+  requireAdminOrSuperUser,
   createRole.validate,
   createRole.invoke
 );
@@ -65,7 +64,7 @@ router.post(
 router.patch(
   "/:id/permissions",
   authenticate,
-  requireSuperUser,
+  requireAdminOrSuperUser,
   updateRolePermissions.validate,
   updateRolePermissions.invoke
 );
@@ -73,7 +72,7 @@ router.patch(
 router.delete(
   "/:id",
   authenticate,
-  requireSuperUser,
+  requireAdminOrSuperUser,
   deleteRole.validate,
   deleteRole.invoke
 );
