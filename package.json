@@ -26,7 +26,9 @@
     "db:init": "node ./src/scripts/dbInit.js",
     "db:seed": "npx sequelize-cli db:seed:all",
     "dev": " NODE_ENV=development nodemon --inspect=0.0.0.0:9229  ./src/index.js",
-    "dev:boot": "npm run db:init && npm run dev"
+    "dev:boot": "npm run db:init && npm run dev",
+    "start": "NODE_ENV=production node ./src/index.js",
+    "start:boot": "npm run db:init && npm run start"
   },
   "author": "",
   "license": "ISC",
