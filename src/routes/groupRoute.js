@@ -67,6 +67,7 @@ router.post(
   authenticate,
   authorize(["join_group"]),
   initGroupResource,
+  invalidateCache(["groups", "users"]),
   asyncHandler(joinGroup.validate),
   asyncHandler(joinGroup.invoke)
 );
@@ -177,7 +178,7 @@ router.patch(
   authorize(["update_group"]),
   initUserResource,
   initGroupResource,
-  invalidateCache(["groups"]),
+  invalidateCache(["groups", "users"]),
   setUserAsGroupLeader.validate,
   setUserAsGroupLeader.invoke
 );
@@ -188,7 +189,7 @@ router.patch(
   authorize(["update_group"]),
   initUserResource,
   initGroupResource,
-  invalidateCache(["groups"]),
+  invalidateCache(["groups", "users"]),
   setUserAsGroupLeader.validate,
   setUserAsGroupLeader.invoke
 );
@@ -199,7 +200,7 @@ router.delete(
   authorize(["assign_user_to_group"]),
   initUserResource,
   initGroupResource,
-  invalidateCache(["groups"]),
+  invalidateCache(["groups", "users"]),
   removeUserFromGroup.validate,
   removeUserFromGroup.invoke
 );
@@ -227,7 +228,7 @@ router.post(
   "/assign",
   authenticate,
   authorize(["assign_user_to_group"]),
-  invalidateCache(["groups"]),
+  invalidateCache(["groups", "users"]),
   assignUserToGroup.validate,
   assignUserToGroup.invoke
 );
@@ -236,6 +237,7 @@ router.get(
   "/count",
   authenticate,
   authorize(["get_all_group", "read_own_group"]),
+  cacheRead("groups"),
   countAllActiveGroups.validate,
   countAllActiveGroups.invoke
 );

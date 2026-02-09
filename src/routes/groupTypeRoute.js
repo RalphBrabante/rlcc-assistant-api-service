@@ -22,7 +22,7 @@ router.post(
   "",
   authenticate,
   authorize(["update_group"]),
-  invalidateCache(["group-types"]),
+  invalidateCache(["group-types", "groups"]),
   createGroupType.validate,
   createGroupType.invoke
 );
@@ -31,7 +31,7 @@ router.delete(
   "/:id",
   authenticate,
   authorize(["update_group"]),
-  invalidateCache(["group-types"]),
+  invalidateCache(["group-types", "groups"]),
   deleteGroupType.validate,
   deleteGroupType.invoke
 );

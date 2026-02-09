@@ -13,6 +13,7 @@ const { cacheRead, invalidateCache } = require("../middlewares/cacheMiddleware")
 
 router.get(
   "/public",
+  cacheRead("configurations-public"),
   getPublicRuntimeSettings.validate,
   getPublicRuntimeSettings.invoke
 );
@@ -29,7 +30,7 @@ router.patch(
   "",
   authenticate,
   requireAdminOrSuperUser,
-  invalidateCache(["configurations"]),
+  invalidateCache(["configurations", "configurations-public"]),
   updateServerConfigurations.validate,
   updateServerConfigurations.invoke
 );

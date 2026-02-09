@@ -33,7 +33,7 @@ router.post(
   "",
   authenticate,
   authorize(["create_user"]),
-  invalidateCache(["users"]),
+  invalidateCache(["users", "groups", "group-topics", "group-messages", "roles"]),
   createUser.validate,
   createUser.invoke
 );
@@ -43,7 +43,7 @@ router.patch(
   authenticate,
   authorize(["update_user"]),
   initUserResource,
-  invalidateCache(["users"]),
+  invalidateCache(["users", "groups", "group-topics", "group-messages", "roles"]),
   updateUser.validate,
   updateUser.invoke
 );

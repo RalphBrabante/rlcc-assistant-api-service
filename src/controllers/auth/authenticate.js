@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getJwtSecret } = require("../../utils/jwtSecret");
 const { getBooleanConfig } = require("../../utils/runtimeConfiguration");
+const { invalidateResource } = require("../../services/cacheService");
 const DUMMY_PASSWORD_HASH =
   "$2b$10$QgqdM9m5rxSLF9mfJLB3j.WSYIEr7g8xY8gPf4f9QWJfbVrIUQ8s2";
 const MAX_FAILED_LOGIN_ATTEMPTS = 5;
@@ -74,6 +75,7 @@ module.exports.invoke = async (req, res, next) => {
           failedLoginAttempts: nextFailedAttempts,
           lockedAt: shouldLock ? new Date() : user.lockedAt,
         });
+        await invalidateResource("users");
 
         if (shouldLock) {
           return next({
@@ -102,6 +104,7 @@ module.exports.invoke = async (req, res, next) => {
       await user.update({
         failedLoginAttempts: 0,
       });
+      await invalidateResource("users");
     }
 
     //create token

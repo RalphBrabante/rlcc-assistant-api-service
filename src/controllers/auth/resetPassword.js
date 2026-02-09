@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
 const { User, PasswordResetToken } = require("../../models");
+const { invalidateResource } = require("../../services/cacheService");
 
 function hasStrongPassword(value) {
   if (value.length < 8 || value.length > 100) return false;
@@ -65,6 +66,7 @@ module.exports.invoke = async (req, res, next) => {
         where: { id: resetToken.userId },
       }
     );
+    await invalidateResource("users");
 
     await PasswordResetToken.update(
       { consumedAt: new Date() },
