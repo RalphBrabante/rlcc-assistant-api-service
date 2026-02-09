@@ -14,10 +14,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "u285537938_rlcc_dev",
+    "password": "8PJ?9W79d@N",
+    "database": "u285537938_rlcc_dev",
+    "host": "srv1040.hstgr.io",
     "dialect": "mysql"
   }
 }
