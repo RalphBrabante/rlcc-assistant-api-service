@@ -2,9 +2,19 @@
 const { Token, User } = require("../../models");
 
 const jwt = require("jsonwebtoken");
+const { getJwtSecret } = require("../../utils/jwtSecret");
+
+function extractBearerToken(authorization = "") {
+  const [scheme, value] = authorization.split(" ");
+  if (!scheme || scheme.toLowerCase() !== "bearer" || !value) return null;
+  return value;
+}
 
 module.exports.validate = async (req, res, next) => {
-  const { token } = req.query;
+  const token =
+    req.query?.token ||
+    req.body?.token ||
+    extractBearerToken(req.headers.authorization || "");
 
   if (!token) {
     return next({
@@ -20,22 +30,10 @@ module.exports.validate = async (req, res, next) => {
 
 module.exports.invoke = async (req, res, next) => {
   const { token } = res.locals;
+  const jwtSecret = getJwtSecret();
 
   try {
-    //check if token is valid
-    jwt.verify(token, "secretKey", (err, decoded) => {
-      if (err) {
-        if (err.name === "JsonWebTokenError") {
-          throw new Error("Authentication Error.");
-        } else if (err.name === "TokenExpiredError") {
-          throw new Error("Session is expired.");
-        } else if (err.name === "JsonWebTokenError") {
-          throw new Error("Session server error.");
-        } else {
-          throw new Error("Server error.");
-        }
-      }
-    });
+    const decoded = jwt.verify(token, jwtSecret);
 
     const tokenFromDb = await Token.findOne({
       where: {
@@ -49,15 +47,25 @@ module.exports.invoke = async (req, res, next) => {
     });
 
     if (!tokenFromDb) {
-      throw new Error("Token no longer exist.");
+      return next({
+        status: 401,
+        message: "Token no longer exists.",
+      });
     }
 
     // delete token and renew
     await Token.destroy({ where: { token } });
 
+    const tokenPayload = {
+      id: decoded.id || tokenFromDb.owner?.id,
+      name: decoded.name || tokenFromDb.owner?.username,
+      permissions: Array.isArray(decoded.permissions) ? decoded.permissions : [],
+      roles: Array.isArray(decoded.roles) ? decoded.roles : [],
+    };
+
     const newGeneratedToken = jwt.sign(
-      { user: tokenFromDb.user },
-      "secretKey",
+      tokenPayload,
+      jwtSecret,
       { expiresIn: "5 hours" }
     );
 
@@ -73,8 +81,22 @@ module.exports.invoke = async (req, res, next) => {
   } catch (error) {
     await Token.destroy({ where: { token } });
 
+    if (error.name === "TokenExpiredError") {
+      return next({
+        status: 401,
+        message: "Session is expired.",
+      });
+    }
+
+    if (error.name === "JsonWebTokenError") {
+      return next({
+        status: 401,
+        message: "Authentication error.",
+      });
+    }
+
     return next({
-      status: 404,
+      status: 500,
       message: error.message,
     });
   }

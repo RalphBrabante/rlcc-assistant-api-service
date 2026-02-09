@@ -1,9 +1,11 @@
 "use strict";
-const { User, Sequelize, Role, Permission } = require("../../models");
-const { Op } = Sequelize;
+const { User, Role, Permission } = require("../../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { getJwtSecret } = require("../../utils/jwtSecret");
 const { getBooleanConfig } = require("../../utils/runtimeConfiguration");
+const DUMMY_PASSWORD_HASH =
+  "$2b$10$QgqdM9m5rxSLF9mfJLB3j.WSYIEr7g8xY8gPf4f9QWJfbVrIUQ8s2";
 
 module.exports.validate = async (req, res, next) => {
   const { credentials } = req.body;
@@ -41,13 +43,6 @@ module.exports.validate = async (req, res, next) => {
     },
   });
 
-  if (!user) {
-    return next({
-      status: 404,
-      message: "User not found.",
-    });
-  }
-
   res.locals.user = user;
   res.locals.password = credentials.password;
 
@@ -58,15 +53,13 @@ module.exports.invoke = async (req, res, next) => {
   const { user, password } = res.locals;
 
   try {
-    //check if password is the same as db password
+    const comparedHash = user?.password || DUMMY_PASSWORD_HASH;
+    const passwordMatched = await bcrypt.compare(password, comparedHash);
 
-    const passwordMatched = await bcrypt.compare(password, user.password);
-
-    //check if password is valid
-    if (!passwordMatched) {
+    if (!user || !passwordMatched) {
       return next({
-        status: 404,
-        message: "Invalid Password",
+        status: 401,
+        message: "Invalid email or password.",
       });
     }
 
@@ -101,7 +94,7 @@ module.exports.invoke = async (req, res, next) => {
           permissions: rolesActions,
           roles,
         },
-        "secretKey",
+        getJwtSecret(),
         {
           expiresIn: "5 hours",
         }
@@ -111,15 +104,18 @@ module.exports.invoke = async (req, res, next) => {
     //save token in database
     await user.createToken({ token });
 
+    const safeUser = user.get({ plain: true });
+    delete safeUser.password;
+
     res.send({
       status: 200,
-      data: { user, token },
+      data: { user: safeUser, token },
     });
 
     next();
   } catch (error) {
     return next({
-      status: 404,
+      status: 500,
       message: error.message,
     });
   }

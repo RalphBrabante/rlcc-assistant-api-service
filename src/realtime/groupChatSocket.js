@@ -2,8 +2,9 @@
 
 const jwt = require("jsonwebtoken");
 const { Token, Group, GroupUsers } = require("../models");
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || "secretKey";
+const JWT_SECRET = getJwtSecret();
 
 function getTokenFromSocket(socket) {
   const authToken = socket.handshake?.auth?.token;
@@ -63,9 +64,27 @@ function setupGroupChatSocket(io) {
 
   io.on("connection", (socket) => {
     socket.join(`user:${socket.user.id}`);
+    const eventBuckets = new Map();
+
+    function isEventRateLimited(eventName, windowMs = 10_000, max = 15) {
+      const now = Date.now();
+      const bucket = eventBuckets.get(eventName);
+      if (!bucket || now - bucket.windowStart >= windowMs) {
+        eventBuckets.set(eventName, { windowStart: now, count: 1 });
+        return false;
+      }
+
+      bucket.count += 1;
+      return bucket.count > max;
+    }
 
     socket.on("join-group-chat", async ({ groupId }, callback) => {
       try {
+        if (isEventRateLimited("join-group-chat")) {
+          callback?.({ ok: false, message: "Too many requests." });
+          return;
+        }
+
         const normalizedGroupId = Number(groupId);
         if (!Number.isInteger(normalizedGroupId) || normalizedGroupId < 1) {
           callback?.({ ok: false, message: "Invalid group id." });
@@ -86,6 +105,7 @@ function setupGroupChatSocket(io) {
     });
 
     socket.on("leave-group-chat", async ({ groupId }) => {
+      if (isEventRateLimited("leave-group-chat")) return;
       const normalizedGroupId = Number(groupId);
       if (!Number.isInteger(normalizedGroupId) || normalizedGroupId < 1) return;
       await socket.leave(`group-chat:${normalizedGroupId}`);

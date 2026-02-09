@@ -1,8 +1,9 @@
 "use strict";
 const jwt = require("jsonwebtoken");
 const { Token } = require("../models");
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || "secretKey";
+const JWT_SECRET = getJwtSecret();
 
 function extractBearerToken(authorization = "") {
   const [scheme, value] = authorization.split(" ");

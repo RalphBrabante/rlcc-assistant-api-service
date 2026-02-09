@@ -3,8 +3,9 @@
 const { randomUUID } = require("crypto");
 const jwt = require("jsonwebtoken");
 const { Permission, Role, Token, User } = require("../models");
+const { getJwtSecret } = require("./jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || "secretKey";
+const JWT_SECRET = getJwtSecret();
 
 async function loadUserWithClaims(userId) {
   return User.findByPk(userId, {

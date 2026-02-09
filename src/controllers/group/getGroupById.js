@@ -1,5 +1,5 @@
 "use strict";
-const { Group, GroupUsers, User } = require("../../models");
+const { Group, GroupType, GroupUsers, User } = require("../../models");
 
 module.exports.cacheRead = async (req, res, next) => {
   next();
@@ -26,6 +26,12 @@ module.exports.invoke = async (req, res, next) => {
           model: User,
           as: "groupMembers",
           attributes: { exclude: ["password"] },
+        },
+        {
+          model: GroupType,
+          as: "groupType",
+          attributes: ["id", "name"],
+          required: false,
         },
       ],
     });

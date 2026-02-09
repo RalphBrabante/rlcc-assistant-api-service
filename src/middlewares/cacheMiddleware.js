@@ -9,7 +9,9 @@ function cacheRead(resourceName) {
   return async (req, res, next) => {
     if (req.method !== "GET") return next();
 
-    const scope = req.originalUrl || req.url || "";
+    const baseScope = req.originalUrl || req.url || "";
+    const authUserId = res.locals?.user?.id;
+    const scope = authUserId ? `${baseScope}::user:${authUserId}` : baseScope;
     const cacheKey = buildCacheKey(resourceName, scope);
 
     try {

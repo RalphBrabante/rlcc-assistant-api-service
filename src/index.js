@@ -9,6 +9,9 @@ const routes = require("./routes");
 const appErrorHandler = require("./middlewares/errorHandler");
 const responseFormatter = require("./middlewares/responseFormatter");
 const mailerTransporter = require("./middlewares/mailerTransporter");
+const securityHeaders = require("./middlewares/securityHeaders");
+const requestSanitizer = require("./middlewares/requestSanitizer");
+const { createRateLimiter } = require("./middlewares/rateLimit");
 const initAmqp = require("./middlewares/initAmqp");
 const titheConsumer = require("./consumers/titheConsumer");
 const usersMigration = require("./consumers/usersMigration");
@@ -29,21 +32,42 @@ const localhostOrigins = [
   "https://www.bulkqrcodegenerator.online",
 ];
 const configuredOrigins = process.env.CORS_ALLOWED_ORIGINS
-  ? process.env.CORS_ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+  ? process.env.CORS_ALLOWED_ORIGINS.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
   : localhostOrigins;
+const trustProxyValue = process.env.TRUST_PROXY;
+
+function parseTrustProxy(value) {
+  if (value === undefined) return undefined;
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  if (/^\d+$/.test(normalized)) return Number(normalized);
+  return value;
+}
+
+function isOriginAllowed(origin) {
+  if (!origin) return true;
+  if (configuredOrigins.length === 0) return false;
+  return configuredOrigins.includes(origin);
+}
 
 async function startServer() {
+  const parsedTrustProxy = parseTrustProxy(trustProxyValue);
+  if (parsedTrustProxy !== undefined) {
+    app.set("trust proxy", parsedTrustProxy);
+  }
+  app.disable("x-powered-by");
+
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
       origin(origin, callback) {
-        if (!origin) {
+        if (isOriginAllowed(origin)) {
           return callback(null, true);
         }
-        if (configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(null, false);
+        return callback(new Error("Not allowed by CORS"));
       },
       credentials: true,
     },
@@ -55,17 +79,23 @@ async function startServer() {
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin) {
+        if (isOriginAllowed(origin)) {
           return callback(null, true);
         }
-        if (configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(null, false);
+        return callback(new Error("Not allowed by CORS"));
       },
+      credentials: true,
     })
   );
-  app.use(express.json());
+  app.use(securityHeaders);
+  app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || "1mb" }));
+  app.use(requestSanitizer);
+  app.use(
+    createRateLimiter({
+      windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
+      max: Number(process.env.RATE_LIMIT_MAX || 300),
+    })
+  );
   app.use(responseFormatter);
 
   const amqp = await initAmqp();

@@ -1,5 +1,5 @@
 "use strict";
-const { Group, GroupUsers, User, Sequelize } = require("../../models");
+const { Group, GroupType, GroupUsers, User, Sequelize } = require("../../models");
 const { Op } = Sequelize;
 
 module.exports.cacheRead = async (req, res, next) => {
@@ -187,6 +187,12 @@ module.exports.invoke = async (req, res, next) => {
           attributes: ["id", "firstName", "lastName", "emailAddress"],
           where: creatorWhere,
           required: Boolean(creatorWhere),
+        },
+        {
+          model: GroupType,
+          as: "groupType",
+          attributes: ["id", "name"],
+          required: false,
         },
       ],
       order: [["id", "DESC"]],
