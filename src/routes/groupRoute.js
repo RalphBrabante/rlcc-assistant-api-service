@@ -10,7 +10,9 @@ const updateGroup = require("../controllers/group/updateGroup");
 const setUserAsGroupLeader = require("../controllers/group/setUserAsGroupLeader");
 const deleteGroup = require("../controllers/group/deleteGroup");
 const getUnassignedUsers = require("../controllers/group/getUnassignedUsers");
-const joinGroup = require("../controllers/group/joinGroup");
+const createGroupJoinRequest = require("../controllers/group/createGroupJoinRequest");
+const getGroupJoinRequests = require("../controllers/group/getGroupJoinRequests");
+const reviewGroupJoinRequest = require("../controllers/group/reviewGroupJoinRequest");
 const removeUserFromGroup = require("../controllers/group/removeUserFromGroup");
 const getGroupMessages = require("../controllers/groupChat/getGroupMessages");
 const sendGroupMessage = require("../controllers/groupChat/sendGroupMessage");
@@ -68,8 +70,28 @@ router.post(
   authorize(["join_group"]),
   initGroupResource,
   invalidateCache(["groups", "users"]),
-  asyncHandler(joinGroup.validate),
-  asyncHandler(joinGroup.invoke)
+  asyncHandler(createGroupJoinRequest.validate),
+  asyncHandler(createGroupJoinRequest.invoke)
+);
+
+router.get(
+  "/:id/join-requests",
+  authenticate,
+  authorize(["read_own_group", "read_all_groups", "update_group"]),
+  initGroupResource,
+  cacheRead("groups"),
+  getGroupJoinRequests.validate,
+  getGroupJoinRequests.invoke
+);
+
+router.patch(
+  "/:id/join-requests/:requestId",
+  authenticate,
+  authorize(["read_own_group", "read_all_groups", "update_group"]),
+  initGroupResource,
+  invalidateCache(["groups", "users"]),
+  reviewGroupJoinRequest.validate,
+  reviewGroupJoinRequest.invoke
 );
 
 router.get(

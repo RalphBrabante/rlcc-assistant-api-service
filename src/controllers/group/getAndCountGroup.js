@@ -1,5 +1,12 @@
 "use strict";
-const { Group, GroupType, GroupUsers, User, Sequelize } = require("../../models");
+const {
+  Group,
+  GroupType,
+  GroupUsers,
+  GroupJoinRequest,
+  User,
+  Sequelize,
+} = require("../../models");
 const { Op } = Sequelize;
 
 module.exports.cacheRead = async (req, res, next) => {
@@ -134,23 +141,6 @@ module.exports.invoke = async (req, res, next) => {
       where[Op.and] = andConditions;
     }
 
-    if (!hasGlobalGroupAccess) {
-      const memberships = await GroupUsers.findAll({
-        where: { userId: user?.id || 0 },
-        attributes: ["groupId"],
-      });
-      const memberGroupIds = memberships.map((membership) => membership.groupId);
-
-      const membershipAccess = {
-        id: { [Op.in]: memberGroupIds.length ? memberGroupIds : [0] },
-      };
-
-      if (!where[Op.and]) {
-        where[Op.and] = [];
-      }
-      where[Op.and].push(membershipAccess);
-    }
-
     let creatorWhere;
     if (encodedBy) {
       const parsedCreatorId = Number.parseInt(encodedBy, 10);
@@ -198,9 +188,57 @@ module.exports.invoke = async (req, res, next) => {
       order: [["id", "DESC"]],
     });
 
+    let memberGroupIdSet = new Set();
+    let pendingRequestByGroupId = new Map();
+
+    if (!hasGlobalGroupAccess && user?.id) {
+      const [memberships, pendingRequests] = await Promise.all([
+        GroupUsers.findAll({
+          where: { userId: user.id },
+          attributes: ["groupId"],
+        }),
+        GroupJoinRequest.findAll({
+          where: {
+            userId: user.id,
+            status: "PENDING",
+          },
+          attributes: ["id", "groupId"],
+        }),
+      ]);
+
+      memberGroupIdSet = new Set(memberships.map((membership) => membership.groupId));
+      pendingRequestByGroupId = new Map(
+        pendingRequests.map((request) => [request.groupId, request.id])
+      );
+    }
+
+    const groupRows = groups.rows.map((row) => {
+      const plainRow = row.get({ plain: true });
+      if (hasGlobalGroupAccess) {
+        return {
+          ...plainRow,
+          isMember: true,
+          hasPendingJoinRequest: false,
+          pendingJoinRequestId: null,
+        };
+      }
+
+      const isMember = memberGroupIdSet.has(plainRow.id);
+      const pendingJoinRequestId = pendingRequestByGroupId.get(plainRow.id) || null;
+      return {
+        ...plainRow,
+        isMember,
+        hasPendingJoinRequest: Boolean(pendingJoinRequestId),
+        pendingJoinRequestId,
+      };
+    });
+
     res.send({
       status: 200,
-      groups,
+      groups: {
+        count: groups.count,
+        rows: groupRows,
+      },
     });
 
     next();
