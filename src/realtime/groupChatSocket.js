@@ -37,6 +37,23 @@ async function hasGroupAccess(user, groupId) {
   return Boolean(membership);
 }
 
+function getOnlineUserIds(io) {
+  const onlineUsers = new Set();
+  io.sockets.sockets.forEach((connectedSocket) => {
+    const userId = Number(connectedSocket?.user?.id);
+    if (Number.isInteger(userId) && userId > 0) {
+      onlineUsers.add(userId);
+    }
+  });
+  return Array.from(onlineUsers);
+}
+
+function emitPresenceSnapshot(io) {
+  io.emit("presence:online-users", {
+    userIds: getOnlineUserIds(io),
+  });
+}
+
 function setupGroupChatSocket(io) {
   io.use(async (socket, next) => {
     try {
@@ -64,6 +81,7 @@ function setupGroupChatSocket(io) {
 
   io.on("connection", (socket) => {
     socket.join(`user:${socket.user.id}`);
+    emitPresenceSnapshot(io);
     const eventBuckets = new Map();
 
     function isEventRateLimited(eventName, windowMs = 10_000, max = 15) {
@@ -98,7 +116,7 @@ function setupGroupChatSocket(io) {
         }
 
         await socket.join(`group-chat:${normalizedGroupId}`);
-        callback?.({ ok: true });
+        callback?.({ ok: true, onlineUserIds: getOnlineUserIds(io) });
       } catch (error) {
         callback?.({ ok: false, message: "Unable to join chat room." });
       }
@@ -109,6 +127,10 @@ function setupGroupChatSocket(io) {
       const normalizedGroupId = Number(groupId);
       if (!Number.isInteger(normalizedGroupId) || normalizedGroupId < 1) return;
       await socket.leave(`group-chat:${normalizedGroupId}`);
+    });
+
+    socket.on("disconnect", () => {
+      emitPresenceSnapshot(io);
     });
   });
 }
